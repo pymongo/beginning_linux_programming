@@ -18,6 +18,7 @@ else
     echo "file not exist"
 fi
 
+# 更强大的消息通知是 wall 命令
 echo -e "\a" # -e means escape '\a' to alert(bell)
 
 exit 0
