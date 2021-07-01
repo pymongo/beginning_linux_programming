@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -u # print error when evalute undefined variable
+
+DIALOG_OK=0
+DIALOG_CANCEL_NO_CTRL_C=1
+DIALOG_HELP=2
+DIALOG_EXTRA=3
+DIALOG_ITEM_HELP=4
+DIALOG_ESC=255
+DIALOG_STDERR_FILE="/home/w/temp/temp_dialog_stderr_output"
+
+# 因为alias不会转发所有参数，所以这里用了"$@"
+# 或者用`alias my_dialog="/usr/bin/gdialog"``，但是alias不生效，所以还是用一个函数委托模式靠谱
+my_dialog() {
+    dialog "$@"
+    #gdialog "$@"
+}
+
+my_dialog --title "Questionnaire" --msgbox "Welcome to my survey" 0 0
+
+my_dialog --title "Confirm" --yesno "Are you willing to take part?" 0 0
+case $? in
+    $DIALOG_OK ) ;;
+    $DIALOG_CANCEL_NO_CTRL_C )
+        dialog --infobox "you select no" 0 0
+        sleep 1
+        dialog --clear
+        exit 0
+    ;;
+esac
+
+# 子shell中运行dialog看不到窗口，而且退出exit_code=DIALOG_ESC=255
+my_dialog --inputbox "Please input your name" 0 0 2> $DIALOG_STDERR_FILE
+case $? in
+    $DIALOG_OK ) input_name=$(cat $DIALOG_STDERR_FILE) ;;
+    $DIALOG_CANCEL_NO_CTRL_C ) exit 0 ;;
+esac
+
+# bash hashmap(associative array), 前面不能加上`declare -A`否则会变成倒序
+countries=(["1"]="China" ["2"]="Japan" ["3"]="Korean")
+print_countries_kv_list() {
+    # notice the ! to expand the keys
+    for key in "${!countries[@]}"; do
+        echo -n "$key ${countries[$key]} "
+    done
+}
+
+my_dialog --menu "$input_name, what's your country" 0 0 0 $(print_countries_kv_list) 2> $DIALOG_STDERR_FILE
+case $? in
+    $DIALOG_OK ) country_select=$(cat $DIALOG_STDERR_FILE) ;;
+    $DIALOG_CANCEL_NO_CTRL_C ) exit 0 ;;
+esac
+
+sleep 1
+my_dialog --clear
+echo "Your name      : $input_name"
+echo "Your country   : ${countries[$country_select]}"
+echo "country_select : $country_select"
+echo $(print_countries_kv_list)
+
+exit 0
