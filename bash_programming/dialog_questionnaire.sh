@@ -10,16 +10,21 @@ DIALOG_ITEM_HELP=4
 DIALOG_ESC=255
 DIALOG_STDERR_FILE="/home/w/temp/temp_dialog_stderr_output"
 
+ui="${1:-cli_ui}"
+
 # 因为alias不会转发所有参数，所以这里用了"$@"
 # 或者用`alias my_dialog="/usr/bin/gdialog"``，但是alias不生效，所以还是用一个函数委托模式靠谱
 my_dialog() {
-    dialog "$@"
-    #gdialog "$@"
+    if [ "$ui" = "cli_ui" ]; then
+        dialog "$@"
+    else
+        gdialog "$@"
+    fi
 }
 
-my_dialog --title "Questionnaire" --msgbox "Welcome to my survey" 0 0
+#my_dialog --title "Questionnaire" --msgbox "Welcome to my survey" 0 0
 
-my_dialog --title "Confirm" --yesno "Are you willing to take part?" 0 0
+my_dialog --title "Confirm" --yesno "Start a survey?" 0 0
 case $? in
     $DIALOG_OK ) ;;
     $DIALOG_CANCEL_NO_CTRL_C )
@@ -31,7 +36,7 @@ case $? in
 esac
 
 # 子shell中运行dialog看不到窗口，而且退出exit_code=DIALOG_ESC=255
-my_dialog --inputbox "Please input your name" 0 0 2> $DIALOG_STDERR_FILE
+my_dialog --inputbox "Input your name" 0 0 2> $DIALOG_STDERR_FILE
 case $? in
     $DIALOG_OK ) input_name=$(cat $DIALOG_STDERR_FILE) ;;
     $DIALOG_CANCEL_NO_CTRL_C ) exit 0 ;;
@@ -46,7 +51,7 @@ print_countries_kv_list() {
     done
 }
 
-my_dialog --menu "$input_name, what's your country" 0 0 0 $(print_countries_kv_list) 2> $DIALOG_STDERR_FILE
+my_dialog --title "Choose your country" --menu "$input_name, Choose your country" 0 0 0 $(print_countries_kv_list) 2> $DIALOG_STDERR_FILE
 case $? in
     $DIALOG_OK ) country_select=$(cat $DIALOG_STDERR_FILE) ;;
     $DIALOG_CANCEL_NO_CTRL_C ) exit 0 ;;
@@ -54,9 +59,9 @@ esac
 
 sleep 1
 my_dialog --clear
-echo "Your name      : $input_name"
-echo "Your country   : ${countries[$country_select]}"
-echo "country_select : $country_select"
-echo $(print_countries_kv_list)
+echo "Your name    : $input_name"
+echo "Your country : ${countries[$country_select]}"
+#echo "country_select = $country_select"
+#echo $(print_countries_kv_list)
 
 exit 0
