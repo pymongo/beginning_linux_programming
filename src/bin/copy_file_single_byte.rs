@@ -1,23 +1,40 @@
 #![warn(clippy::nursery, clippy::pedantic)]
-#![feature(rustc_private)]
-extern crate libc;
 
 /// [cargo target auto-discovery](https://doc.rust-lang.org/cargo/guide/project-layout.html)
 fn main() {
-    unsafe { _main(); }
+    unsafe {
+        _main();
+    }
 }
 
 /// `chapter03/copy_stream.c`
 unsafe fn _main() {
-    let read_fd = libc::open("Cargo.toml\0".as_ptr().cast(), libc::O_RDONLY);
-    assert_ne!(read_fd, -1_i32);
+    let target_debug_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("target")
+        .join("debug");
+    let read_path = format!(
+        "{}\0",
+        target_debug_path
+            .join("copy_file_single_byte")
+            .to_str()
+            .unwrap()
+    );
+    let write_path = format!(
+        "{}\0",
+        target_debug_path
+            .join("copy_file_single_byte.bak")
+            .to_str()
+            .unwrap()
+    );
+    let read_fd = libc::open(read_path.as_ptr().cast(), libc::O_RDONLY);
+    assert_ne!(read_fd, -1);
     // std::fs::OpenOptions::create(true), std::fs::OpenOptions::truncate(true)
     let write_fd = libc::open(
-        "target/Cargo.toml.bak\0".as_ptr().cast(),
+        write_path.as_ptr().cast(),
         libc::O_WRONLY | libc::O_CREAT | libc::O_TRUNC,
         libc::S_IRUSR | libc::S_IWUSR,
     );
-    if write_fd == -1_i32 {
+    if write_fd == -1 {
         // need S_IWUSR permission at first time for second time write, otherwise get errno PermissionDenied
         panic!("{:?}", std::io::Error::last_os_error());
     }
