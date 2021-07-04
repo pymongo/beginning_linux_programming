@@ -5,9 +5,3 @@ edition = "2018"
 
 [dependencies]
 libc = "*"
-
-# [package.metadata.rust-analyzer]
-# rustc_private=true
-# 用rustc自带的libc时，ra读libc函数的类型信息和自动补全都太慢了
-# #![feature(rustc_private)]
-# extern crate libc;
