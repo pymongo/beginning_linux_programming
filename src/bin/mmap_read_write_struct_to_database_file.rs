@@ -1,4 +1,5 @@
 #![warn(clippy::nursery, clippy::pedantic)]
+#![allow(clippy::cast_possible_truncation)]
 
 type Username = [u8; 7];
 
@@ -34,85 +35,71 @@ impl User {
     }
 
     #[inline]
+    #[allow(clippy::trivially_copy_pass_by_ref)] // must pass reference
     const fn as_ptr(&self) -> *const Self {
         self as *const Self
     }
 
     /**
-    ```no_run
-    /// these can compile, Rust think *mut is superset of *const?
+    // these can compile, Rust think *mut is superset of *const?
     fn as_mut_ptr(&mut self) -> *const Self {
         self as *mut Self
     }
-    ```
     */
     #[inline]
     fn as_mut_ptr(&mut self) -> *mut Self {
         self as *mut Self
     }
 
-    fn user_id_is_valid(user_id: u8) -> bool {
+    const fn user_id_is_valid(user_id: u8) -> bool {
         user_id < Self::LEN as u8
     }
 
     /**
     ```text
     $ od -c target/user.db
-    0000000 001   u   s   e   r   _   0   1 002   u   s   e   r   _   0   2
-    0000020 003   u   s   e   r   _   0   3 004   u   s   e   r   _   0   4
-    0000040 005   u   s   e   r   _   0   5 006   u   s   e   r   _   0   6
-    0000060  \a   u   s   e   r   _   0   7  \b   u   s   e   r   _   0   8
-    0000100  \t   u   s   e   r   _   0   9  \n   u   s   e   r   _   1   0
+    0000000  \0   u   s   e   r   _   0   0 001   u   s   e   r   _   0   1
+    0000020 002   u   s   e   r   _   0   2 003   a   c   c   o   u   n   t
+    0000040 004   u   s   e   r   _   0   4 005   u   s   e   r   _   0   5
+    0000060 006   u   s   e   r   _   0   6  \a   u   s   e   r   _   0   7
+    0000100  \b   u   s   e   r   _   0   8  \t   u   s   e   r   _   0   9
     0000120
     ```
     note that user_id=006 is escape to b'\a' in od
     */
     unsafe fn insert_sample_data() {
-        let fp = libc::fopen(
-            Self::DB_FILENAME.as_ptr().cast(),
-            "w\0".as_ptr().cast(),
-        );
+        let fp = libc::fopen(Self::DB_FILENAME.as_ptr().cast(), "w\0".as_ptr().cast());
         for user_id in 0..Self::LEN {
-            let user = User::new(user_id as u8);
+            let user = Self::new(user_id as u8);
+            dbg!(user_id, user);
             libc::fwrite(user.as_ptr().cast(), Self::SIZE, 1, fp);
         }
         libc::fclose(fp);
     }
 
-    unsafe fn select_all() -> Vec<User> {
-        let fp = libc::fopen(
-            Self::DB_FILENAME.as_ptr().cast(),
-            "r\0".as_ptr().cast(),
-        );
+    unsafe fn select_all() -> Vec<Self> {
+        let fp = libc::fopen(Self::DB_FILENAME.as_ptr().cast(), "r\0".as_ptr().cast());
         let mut users = [std::mem::zeroed::<Self>(); Self::LEN];
         libc::fread(users.as_mut_ptr().cast(), Self::SIZE, Self::LEN, fp);
         libc::fclose(fp);
         users.to_vec()
     }
 
-    /// since current doesn't support delete, so user_id=n must be record n
-    unsafe fn find_user_by_id(user_id: u8) -> User {
+    unsafe fn find_user_by_id(user_id: u8) -> Self {
         assert!(Self::user_id_is_valid(user_id));
-        let fp = libc::fopen(
-            Self::DB_FILENAME.as_ptr().cast(),
-            "r\0".as_ptr().cast(),
-        );
-        let mut user = std::mem::zeroed::<User>();
+        let fp = libc::fopen(Self::DB_FILENAME.as_ptr().cast(), "r\0".as_ptr().cast());
+        let mut user = std::mem::zeroed::<Self>();
         libc::fseek(fp, i64::from(user_id) * Self::SIZE as i64, libc::SEEK_SET);
         libc::fread(user.as_mut_ptr().cast(), Self::SIZE, 1, fp);
         libc::fclose(fp);
         user
     }
 
-    /// since current doesn't support delete, so user_id=n must be record n
     unsafe fn update_username_by_id(user_id: u8, username: Username) {
         assert!(Self::user_id_is_valid(user_id));
         let offset = i64::from(user_id) * Self::SIZE as i64;
-        let fp = libc::fopen(
-            Self::DB_FILENAME.as_ptr().cast(),
-            "r+\0".as_ptr().cast(),
-        );
-        let mut user = std::mem::zeroed::<User>();
+        let fp = libc::fopen(Self::DB_FILENAME.as_ptr().cast(), "r+\0".as_ptr().cast());
+        let mut user = std::mem::zeroed::<Self>();
         libc::fseek(fp, offset, libc::SEEK_SET);
         libc::fread(user.as_mut_ptr().cast(), Self::SIZE, 1, fp);
         user.username = username;
@@ -131,9 +118,8 @@ impl User {
     unsafe fn update_username_by_id_using_mmap(user_id: u8, username: Username) {
         assert!(Self::user_id_is_valid(user_id));
         let fd = libc::open(Self::DB_FILENAME.as_ptr().cast(), libc::O_RDWR);
-
         let mapped_addr = libc::mmap(
-            0 as *mut libc::c_void,
+            std::ptr::null_mut::<libc::c_void>(),
             Self::LEN,
             libc::PROT_READ | libc::PROT_WRITE,
             // The segment changes are made in the file
@@ -141,13 +127,13 @@ impl User {
             fd,
             0,
         );
-        // mmap return 0 is ok, !0 is libc::MAP_FAILED
         if mapped_addr == libc::MAP_FAILED {
+            // mmap return 0 is ok, !0 is libc::MAP_FAILED
             libc::perror("\0".as_ptr().cast());
             libc::exit(1);
         }
         libc::close(fd); // mmap成功后就可以关闭fd，关闭fd不会影响mmap
-        let users = mapped_addr as *mut [User; Self::LEN];
+        let users = mapped_addr.cast::<[Self; Self::LEN]>();
         (*users)[usize::from(user_id)].username = username;
         // sync mapping
         libc::msync(mapped_addr, Self::LEN * Self::SIZE, libc::MS_SYNC);
@@ -159,10 +145,12 @@ impl User {
 fn main() {
     unsafe {
         User::insert_sample_data();
-        User::select_all();
+        dbg!(User::select_all());
         assert_eq!(User::find_user_by_id(3).username, *b"user_03");
+
         User::update_username_by_id(3, *b"tuesday");
         assert_eq!(User::find_user_by_id(3).username, *b"tuesday");
+
         User::update_username_by_id_using_mmap(3, *b"account");
         assert_eq!(User::find_user_by_id(3).username, *b"account");
     }
