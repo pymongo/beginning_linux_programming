@@ -7,7 +7,11 @@ fn main() {
     }
 }
 
-/// `chapter03/copy_stream.c`
+/**
+`chapter03/copy_stream.c`
+哪怕用stdio.h的fgetc/fputc 一个个byte那么写，由于stdio.h内置了buffer，会比以下代码快得的
+内置的buffer会例如放满1024个byte才调用一次libc::write，极大减少了系统调用次数
+*/
 unsafe fn _main() {
     let target_debug_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("target")

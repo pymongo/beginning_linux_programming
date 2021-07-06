@@ -1,6 +1,8 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
+    let args = std::env::args().collect::<Vec<_>>();
+    dbg!(args);
     unsafe {
         _main();
     }

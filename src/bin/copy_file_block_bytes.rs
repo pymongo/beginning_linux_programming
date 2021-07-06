@@ -20,17 +20,18 @@ unsafe fn _main() {
             .to_str()
             .unwrap()
     );
-    let write_path = format!(
-        "{}\0",
+    let write_path = std::ffi::CString::new(
         target_debug_path
             .join("copy_file_single_byte.bak")
             .to_str()
             .unwrap()
-    );
+            .as_bytes(),
+    )
+    .unwrap();
     let read_fd = libc::open(read_path.as_ptr().cast(), libc::O_RDONLY);
     assert_ne!(read_fd, -1_i32);
     let write_fd = libc::open(
-        write_path.as_ptr().cast(),
+        write_path.as_ptr(),
         libc::O_WRONLY | libc::O_CREAT | libc::O_TRUNC,
         libc::S_IRUSR | libc::S_IWUSR,
     );
