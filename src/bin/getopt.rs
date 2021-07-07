@@ -35,24 +35,25 @@ fn main() {
     let optstr = ":if:lr\0";
     unsafe {
         loop {
+            // alternative is getopt_long, but need one more arg longopts: Vec<option>
             let opt = libc::getopt(argc, argv.as_ptr().cast(), optstr.as_ptr().cast());
             if opt == -1 {
                 break;
             }
             match opt as u8 {
                 b'i' | b'l' | b'r' => println!("option: {}", opt as u8 as char),
-                b'f' => println!("filename: {:?}", std::ffi::CStr::from_ptr(optarg)),
+                b'f' => {
+                    libc::printf("filename: %s\n\0".as_ptr().cast(), optarg);
+                }
                 b':' => println!("option needs a value"),
                 b'?' => println!("unknown option: {}", optopt as u8 as char),
                 _ => unreachable!(),
             }
         }
-    }
-    // optind indicates where the remaining arguments unused
-    // getopt would rewrite argv's order, move unused to the end of array
-    for i in unsafe { optind }..argc {
-        println!("argument: {:?}", unsafe {
-            std::ffi::CStr::from_ptr(argv[i as usize])
-        });
+        // optind indicates where the remaining arguments unused
+        // getopt would rewrite argv's order, move unused to the end of array
+        for i in optind..argc {
+            libc::printf("argument: %s\n\0".as_ptr().cast(), argv[i as usize]);
+        }
     }
 }
