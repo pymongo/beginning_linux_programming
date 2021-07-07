@@ -4,11 +4,13 @@ extern "C" {
     fn mktemp(template: *mut libc::c_char) -> *mut libc::c_char;
 }
 
+/// recommend use tmpfile/mkstemp rather than tmpnam/mktemp
 fn main() {
     // random tmpnam' max_len = libc::L_tmpnam
     let mut tmp_filename = [0_u8; libc::L_tmpnam as usize];
     unsafe {
         libc::tmpnam(tmp_filename.as_mut_ptr().cast());
+        #[allow(clippy::cast_ptr_alignment)]
         libc::printf(
             "tmp_filename = %s\n\0".as_ptr().cast(),
             tmp_filename.as_ptr().cast::<*const libc::c_char>(),
