@@ -4,11 +4,11 @@ fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     dbg!(args);
     unsafe {
-        _main();
+        main_();
     }
 }
 
-unsafe fn _main() {
+unsafe fn main_() {
     let mut a = 0_i32;
     let mut b = 0_i32;
     let modified_count1 = libc::sscanf(

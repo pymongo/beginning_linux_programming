@@ -2,13 +2,13 @@
 
 fn main() {
     unsafe {
-        _main();
+        main_();
     }
 }
 
 /// `chapter03/copy_block.c`
 #[allow(clippy::cast_sign_loss)]
-unsafe fn _main() {
+unsafe fn main_() {
     const BLOCK_SIZE: usize = 1024;
     let target_debug_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("target")

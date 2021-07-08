@@ -130,7 +130,7 @@ impl User {
         if mapped_addr == libc::MAP_FAILED {
             // mmap return 0 is ok, !0 is libc::MAP_FAILED
             libc::perror("\0".as_ptr().cast());
-            libc::exit(1);
+            libc::exit(libc::EXIT_FAILURE);
         }
         libc::close(fd); // mmap成功后就可以关闭fd，关闭fd不会影响mmap
         let users = mapped_addr.cast::<[Self; Self::LEN]>();

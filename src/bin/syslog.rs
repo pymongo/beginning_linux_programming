@@ -3,7 +3,7 @@
 fn main() {
     print_all_syslog_level();
     unsafe {
-        _main();
+        main_();
     }
 }
 
@@ -24,7 +24,7 @@ const fn log_upto(priority: i32) -> i32 {
 }
 
 /// journalctl -perr --output=json-pretty -f
-unsafe fn _main() {
+unsafe fn main_() {
     // ident is syslog unit name
     libc::openlog(
         "syslog.rs\0".as_ptr().cast(),

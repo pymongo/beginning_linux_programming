@@ -2,11 +2,11 @@
 
 fn main() {
     unsafe {
-        _main();
+        main_();
     }
 }
 
-unsafe fn _main() {
+unsafe fn main_() {
     let mut rusage = std::mem::zeroed();
     // libc::RUSAGE_SELF: usage information about current program
     // libc::RUSAGE_CHILDREN: usage information about current program and child processes as well

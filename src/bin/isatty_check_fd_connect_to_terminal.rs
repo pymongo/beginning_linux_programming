@@ -2,11 +2,11 @@
 
 fn main() {
     unsafe {
-        _main();
+        main_();
     }
 }
 
-unsafe fn _main() {
+unsafe fn main_() {
     if libc::isatty(1) == 1 {
         println!("stdout is redirect to terminal");
     }

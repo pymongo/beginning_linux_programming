@@ -2,13 +2,13 @@
 
 fn main() {
     unsafe {
-        _main();
+        main_();
     }
 }
 
 const PASSWORD_LEN: usize = 6;
 
-unsafe fn _main() {
+unsafe fn main_() {
     let mut old_termios = std::mem::zeroed();
     libc::tcgetattr(libc::STDIN_FILENO, &mut old_termios);
 

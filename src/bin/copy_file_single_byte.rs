@@ -4,7 +4,7 @@
 /// [cargo target auto-discovery](https://doc.rust-lang.org/cargo/guide/project-layout.html)
 fn main() {
     unsafe {
-        _main();
+        main_();
     }
 }
 
@@ -13,7 +13,7 @@ fn main() {
 哪怕用stdio.h的fgetc/fputc 一个个byte那么写，由于stdio.h内置了buffer，会比以下代码快得的
 内置的buffer会例如放满1024个byte才调用一次libc::write，极大减少了系统调用次数
 */
-unsafe fn _main() {
+unsafe fn main_() {
     let target_debug_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("target")
         .join("debug");
