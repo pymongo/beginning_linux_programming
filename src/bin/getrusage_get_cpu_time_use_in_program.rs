@@ -20,5 +20,4 @@ unsafe fn _main() {
     dbg!(rusage.ru_stime.tv_sec);
     println!("system/kernel space time microseconds:");
     dbg!(rusage.ru_stime.tv_usec);
-
 }

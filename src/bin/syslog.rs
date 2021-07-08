@@ -18,16 +18,19 @@ fn print_all_syslog_level() {
     dbg!(libc::LOG_DEBUG);
 }
 
-/// syslog.h LOG_UPTO
-fn log_upto(priority: i32) -> i32 {
-    (1 << ((priority)+1)) - 1
+/// syslog.h `LOG_UPTO`
+const fn log_upto(priority: i32) -> i32 {
+    (1 << ((priority) + 1)) - 1
 }
 
 /// journalctl -perr --output=json-pretty -f
 unsafe fn _main() {
-
     // ident is syslog unit name
-    libc::openlog("syslog.rs\0".as_ptr().cast(), libc::LOG_PID | libc::LOG_CONS, libc::LOG_USER);
+    libc::openlog(
+        "syslog.rs\0".as_ptr().cast(),
+        libc::LOG_PID | libc::LOG_CONS,
+        libc::LOG_USER,
+    );
 
     // %m is not a printf format, is a syslog addition
     libc::syslog(
