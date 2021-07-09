@@ -3,9 +3,10 @@ use std::os::raw::{c_char, c_int};
 
 #[link(name = "curses", kind = "dylib")]
 extern "C" {
+    /// TODO return *mut WINDOW
     fn initscr();
-    fn endwin();
-    fn refresh();
+    fn endwin() -> c_int;
+    fn refresh() -> c_int;
     #[link_name = "move"]
     fn move_(x: c_int, y: c_int) -> c_int;
     fn printw(format: *const c_char, ...) -> c_int;
