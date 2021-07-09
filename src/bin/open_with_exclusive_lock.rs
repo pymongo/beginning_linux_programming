@@ -1,7 +1,5 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 
-// Blocking waiting for file lock on build directory
-
 fn main() {
     unsafe {
         main_();
@@ -24,9 +22,12 @@ unsafe fn main_() {
         libc::sleep(2);
     }
     for built_crates in 0..=5 {
-        let mut progress = "=".repeat(built_crates*2);
+        let mut progress = "=".repeat(built_crates * 2);
         progress.push('>');
-        println!("    \x1b[1;36mBuilding\x1b[0m [{:<11}] {}/5", progress,built_crates);
+        println!(
+            "    \x1b[1;36mBuilding\x1b[0m [{:<11}] {}/5",
+            progress, built_crates
+        );
         libc::sleep(1);
     }
     println!("    \x1b[1;32mFinished\x1b[0m dev [unoptimized + debuginfo] target(s) in 5.00s");
