@@ -9,7 +9,7 @@ fn main() {
 
 const FILENAME: *const libc::c_char = "/tmp/my_cargo.lock\0".as_ptr().cast();
 const DEFAULT_BYTE: u8 = b'a';
-const BYTES_LEN: i64 = 4;
+const BYTES_LEN: libc::c_long = 4;
 
 unsafe fn set_lock() {
     let fd = libc::open(
@@ -54,7 +54,7 @@ unsafe fn set_lock() {
     libc::unlink(FILENAME);
 }
 
-const fn new_flock(start_addr: i64) -> libc::flock {
+const fn new_flock(start_addr: libc::c_long) -> libc::flock {
     libc::flock {
         l_type: libc::F_WRLCK as i16,
         l_whence: libc::SEEK_SET as i16,
