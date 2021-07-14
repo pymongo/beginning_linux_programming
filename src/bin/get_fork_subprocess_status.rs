@@ -9,12 +9,22 @@ fn main() {
 unsafe fn print_pid_status(pid: libc::pid_t) {
     let mut buf = [0_u8; 128];
     // print PID status
-    libc::sprintf(buf.as_mut_ptr().cast(), "cat /proc/%d/status | head -n 7 && echo -e '\n'\0".as_ptr().cast(), pid);
+    libc::sprintf(
+        buf.as_mut_ptr().cast(),
+        "cat /proc/%d/status | head -n 7 && echo -e '\n'\0"
+            .as_ptr()
+            .cast(),
+        pid,
+    );
     libc::system(buf.as_ptr().cast());
     libc::printf("\n\0".as_ptr().cast());
     buf = [0_u8; 128];
     // print PID task
-    libc::sprintf(buf.as_mut_ptr().cast(), "ls /proc/%d/task && echo -e '\n'\0".as_ptr().cast(), pid);
+    libc::sprintf(
+        buf.as_mut_ptr().cast(),
+        "ls /proc/%d/task && echo -e '\n'\0".as_ptr().cast(),
+        pid,
+    );
     libc::system(buf.as_ptr().cast());
 }
 

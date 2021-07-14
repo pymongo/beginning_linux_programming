@@ -55,7 +55,7 @@ unsafe fn main_() {
     let mut sig_mask = std::mem::zeroed();
     // block all signal
     libc::sigfillset(&mut sig_mask); // libc::sigemptyset(&mut sig_mask);
-    // only allow SIGALRM
+                                     // only allow SIGALRM
     libc::sigdelset(&mut sig_mask, libc::SIGALRM);
     libc::sigsuspend(&sig_mask);
 
@@ -63,21 +63,18 @@ unsafe fn main_() {
         println!("parent receive SIGALRM");
     }
 
-    let _a = stat {
-        id: 0
-    };
+    let _a = stat { id: 0 };
     let _b = stat();
+    // libc::_;
 }
 
 /// Rust 很不好的设计，为了兼容 C 例如 stat 既是结构体也是函数名，Rust 也这样搞，导致静态分析变困难，ra 没法识别 `libc::sigaction` 结构体
 #[allow(dead_code, non_camel_case_types)]
 struct stat {
-    id: i32
+    id: i32,
 }
 
 #[allow(dead_code)]
 const fn stat() -> stat {
-    stat {
-        id: 0
-    }
+    stat { id: 0 }
 }
