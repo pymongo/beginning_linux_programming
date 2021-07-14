@@ -39,11 +39,16 @@ fn main() {
         let wait_ret_child_process_pid = unsafe { libc::wait(&mut wait_ret_child_process_status) };
         assert_eq!(child_process_pid, wait_ret_child_process_pid);
         if libc::WIFEXITED(wait_ret_child_process_status) {
-            println!("child exit code = {}", libc::WEXITSTATUS(wait_ret_child_process_status));
+            println!(
+                "child exit code = {}",
+                libc::WEXITSTATUS(wait_ret_child_process_status)
+            );
         } else {
             println!("child process exit abnormally");
         }
     }
 
-    unsafe { libc::exit(exit_code); }
+    unsafe {
+        libc::exit(exit_code);
+    }
 }
