@@ -2,6 +2,7 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 use libc::c_void;
 
+/// 由于是更早版本的 Linux 没有这个 API, 为了兼容老的 Linux 机器能编译 libc ，所以没加这个 API
 #[link(name = "pthread")]
 extern "C" {
     fn pthread_attr_setschedpolicy(
