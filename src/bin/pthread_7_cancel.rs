@@ -9,7 +9,7 @@ fn main() {
 }
 
 /// 由于是更早版本的 Linux 没有这个 API, 为了兼容老的 Linux 机器能编译 libc ，所以没加这个 API
-#[link(name="pthread")]
+#[link(name = "pthread")]
 extern "C" {
     fn pthread_setcanceltype(new_cancel_type: c_int, old_cancel_type: *mut c_int) -> c_int;
 }
