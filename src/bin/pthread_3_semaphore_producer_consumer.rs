@@ -22,7 +22,7 @@ unsafe fn producer() {
         &mut thread_2,
         std::ptr::null(),
         consumer,
-        (&mut binary_semaphore as *mut sem_t).cast::<c_void>(),
+        (&mut binary_semaphore as *mut sem_t).cast(),
     );
     assert_eq!(res, 0);
 
