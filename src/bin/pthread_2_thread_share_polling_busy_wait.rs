@@ -11,11 +11,13 @@ fn main() {
 static mut SHARED_VAR: u8 = 1;
 
 /**
+```text
 loop {
     thread_1(SHARED_VAR: 1->2)
     thread_2(SHARED_VAR: 2->1)
 }
-两个线程就像踢皮球那样互相占用 SHARED_VAR 有没有更好的共享可变数据的方式呢?
+```
+两个线程就像踢皮球那样互相占用 `SHARED_VAR` 有没有更好的共享可变数据的方式呢?
 
 我的第一感觉就是用互斥锁，但要加上超时，方便调试死锁
 */
@@ -23,12 +25,18 @@ extern "C" fn thread_2_function(_arg: *mut c_void) -> *mut c_void {
     for _ in 0..10 {
         if unsafe { SHARED_VAR } == 2 {
             println!("thread_2 print 2");
-            unsafe { SHARED_VAR = 1; }
+            unsafe {
+                SHARED_VAR = 1;
+            }
         } else {
-            unsafe { libc::usleep(10 * 1000); }
+            unsafe {
+                libc::usleep(10 * 1000);
+            }
         }
     }
-    unsafe { libc::pthread_exit(std::ptr::null_mut()); }
+    unsafe {
+        libc::pthread_exit(std::ptr::null_mut());
+    }
 }
 
 unsafe fn main_() {
