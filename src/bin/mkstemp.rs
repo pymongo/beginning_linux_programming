@@ -10,10 +10,9 @@ fn main() {
     let mut tmp_filename = [0_u8; libc::L_tmpnam as usize];
     unsafe {
         libc::tmpnam(tmp_filename.as_mut_ptr().cast());
-        #[allow(clippy::cast_ptr_alignment)]
         libc::printf(
             "tmp_filename = %s\n\0".as_ptr().cast(),
-            tmp_filename.as_ptr().cast::<*const libc::c_char>(),
+            tmp_filename.as_ptr().cast::<libc::c_char>(),
         );
 
         let tmpfp = libc::tmpfile();

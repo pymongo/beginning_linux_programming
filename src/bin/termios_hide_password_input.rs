@@ -28,10 +28,9 @@ unsafe fn main_() {
     #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
     libc::fgets(password.as_mut_ptr().cast(), PASSWORD_LEN as i32, stdin);
     libc::fclose(stdin);
-    #[allow(clippy::cast_ptr_alignment)]
     libc::printf(
         "\nYour entered %s\n\0".as_ptr().cast(),
-        password.as_ptr().cast::<*const libc::c_char>(),
+        password.as_ptr().cast::<libc::c_char>(),
     );
 
     // same as `stty echo` to enable echo
