@@ -25,6 +25,7 @@ unsafe fn main_thread() {
         libc::pthread_mutex_lock(&mut mutex);
         println!("thread 1 print 1");
         libc::pthread_mutex_unlock(&mut mutex);
+        // delay between lock and unlock
         libc::usleep(1);
     }
 
