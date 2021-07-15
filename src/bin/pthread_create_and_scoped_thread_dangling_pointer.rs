@@ -1,3 +1,4 @@
+//! ch12/thread1.c
 #![warn(clippy::nursery, clippy::pedantic)]
 use libc::c_void;
 
