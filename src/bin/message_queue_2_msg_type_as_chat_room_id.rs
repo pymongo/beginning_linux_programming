@@ -6,10 +6,10 @@ extern "C" {
     fn ctime(timestamp: *const libc::time_t) -> *const libc::c_char;
 }
 
+/// must run receiver first
 fn main() {
-    let is_receiver = std::env::args().len() == 1;
     unsafe {
-        run(is_receiver);
+        run(true);
     }
 }
 
@@ -41,7 +41,7 @@ unsafe fn print_mq_status(msqid: i32) {
     // IPC_SET 命令是修改 MQ 的 msqid_ds 状态结构体
     let mut msqid_ds = std::mem::zeroed();
     let res = libc::msgctl(msqid, libc::IPC_STAT, &mut msqid_ds);
-    if res != 0 {
+    if res == -1 {
         panic!("{}", std::io::Error::last_os_error());
     }
     libc::printf(
@@ -123,6 +123,7 @@ unsafe fn run(is_receiver: bool) {
             print_mq_status(msqid);
         }
     }
-    // print_mq_status(msqid);
-    libc::msgctl(msqid, libc::IPC_RMID, std::ptr::null_mut());
+    if is_receiver {
+        libc::msgctl(msqid, libc::IPC_RMID, std::ptr::null_mut());
+    }
 }
