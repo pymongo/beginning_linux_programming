@@ -1,4 +1,4 @@
-#![allow(clippy::doc_markdown)]
+#![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
     unsafe {

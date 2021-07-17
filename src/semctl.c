@@ -55,6 +55,7 @@ int main(const int argc, const char *argv[])
     //srand((unsigned int)time(NULL)); // Bad, system time might be controlled by user https://reviews.llvm.org/D44143
     srand((unsigned int)getpid());
 
+    // key=IPC_PRIVATE only share sem in current process
     const int sem_id = semget((key_t)1234, 1, 0666 | IPC_CREAT);
 
     char op_char = 'O';
