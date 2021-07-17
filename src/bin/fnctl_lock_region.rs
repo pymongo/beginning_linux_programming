@@ -54,6 +54,7 @@ unsafe fn set_lock() {
     libc::unlink(FILENAME);
 }
 
+#[cfg(test)]
 const fn new_flock(start_addr: libc::c_long) -> libc::flock {
     libc::flock {
         l_type: libc::F_WRLCK as i16,
@@ -64,7 +65,7 @@ const fn new_flock(start_addr: libc::c_long) -> libc::flock {
     }
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 unsafe fn get_lock() {
     let fd = libc::open(
         FILENAME,

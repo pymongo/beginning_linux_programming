@@ -1,3 +1,4 @@
+//! ch14/shm1.c and ch14/shm2.c
 #![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
@@ -38,7 +39,7 @@ unsafe fn run(is_consumer: bool) {
 
     // consumer: mem false -> true
     // producer: mem true -> false
-    let mem = shmaddr.cast::<bool>();
+    let mem = shmaddr.cast::<bool>(); // use this bool flag provide atomic write to mem
     let mut modified_count = 0;
     while is_running {
         if is_consumer {
