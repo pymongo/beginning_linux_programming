@@ -1,3 +1,4 @@
+//! ch16/client1.c, ch16/server1.c
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(
     clippy::cast_possible_truncation,
@@ -49,7 +50,6 @@ unsafe fn server() {
     */
     let server_socket_fd = libc::socket(libc::AF_UNIX, libc::SOCK_STREAM, 0);
     assert_ne!(server_socket_fd, -1);
-    dbg!(server_socket_fd);
 
     // 2. bind(): bind a name(file?) to a socket(fd)
     // AF_UNIX 的 地址最好用 sockaddr_un 的结构体，跟 AF_INET 用的 sockaddr_in 区分开
@@ -84,8 +84,7 @@ unsafe fn server() {
         (&mut client_addr as *mut libc::sockaddr_un).cast(),
         &mut peer_addr_len,
     );
-    dbg!(client_socket_fd);
-    print_filename_from_fd(client_socket_fd);
+    beginning_linux_programming::print_filename_from_fd(client_socket_fd);
     dbg!(peer_addr_len);
     if client_socket_fd == -1 {
         panic!("{}", std::io::Error::last_os_error());
@@ -118,7 +117,7 @@ unsafe fn client() {
     // 1. socket(domain, type protocol)
     let socket_fd = libc::socket(libc::AF_UNIX, libc::SOCK_STREAM, 0);
     assert_ne!(socket_fd, -1);
-    print_filename_from_fd(socket_fd);
+    beginning_linux_programming::print_filename_from_fd(socket_fd);
     dbg!(socket_fd);
 
     // 2. connect(socket_fd, sockaddr)
@@ -129,7 +128,10 @@ unsafe fn client() {
     // };
     let mut server_addr: libc::sockaddr_un = std::mem::zeroed();
     server_addr.sun_family = libc::AF_UNIX as u16;
-    libc::strcpy(server_addr.sun_path.as_mut_ptr(), SERVER_SOCKET_FILENAME.as_ptr().cast());
+    libc::strcpy(
+        server_addr.sun_path.as_mut_ptr(),
+        SERVER_SOCKET_FILENAME.as_ptr().cast(),
+    );
     let connect_res = libc::connect(
         socket_fd,
         (&server_addr as *const libc::sockaddr_un).cast(),
@@ -155,23 +157,4 @@ unsafe fn client() {
     println!("response = {}", buf);
 
     libc::close(socket_fd);
-}
-
-unsafe fn print_filename_from_fd(fd: i32) {
-    // linux/limits.h
-    const NAME_MAX: usize = 255;
-    // /proc/self is symbolic link to /proc/$PID
-    // /proc/self/fd/$FD 一般都是一个软链接，如果是 socket/pipe 则会长这个样子: socket:[3428314]
-    let fd_path = format!("/proc/self/fd/{}\0", fd);
-    let mut buf = [0_u8; NAME_MAX];
-    let n_read = libc::readlink(fd_path.as_ptr().cast(), buf.as_mut_ptr().cast(), NAME_MAX);
-    if n_read == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
-    let path = String::from_utf8_unchecked(buf[..n_read as usize].to_vec());
-    dbg!(path);
-
-    // let mut stat = std::mem::zeroed();
-    // libc::fstat(fd, &mut stat);
-    // stat.st_dev;
 }
