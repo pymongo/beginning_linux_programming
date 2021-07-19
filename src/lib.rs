@@ -1,7 +1,21 @@
 //! Beginning Linux Programming 4th edition exercises
 #![warn(clippy::nursery, clippy::pedantic)]
 //#![warn(clippy::restriction)]
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
+    clippy::doc_markdown,
+    clippy::missing_panics_doc,
+    clippy::missing_safety_doc
+)]
 use libc::{c_char, c_int, in_addr};
+#[cfg(test)]
+mod pthread;
+#[cfg(test)]
+mod socket;
+#[cfg(test)]
+mod pipe;
 
 /**
 ```text
@@ -33,6 +47,12 @@ extern "C" {
     pub fn inet_ntoa(in_: in_addr) -> *mut c_char;
     // inet_addr 是 inet_aton 完全不考虑字符串解析错误的版本
     // fn inet_addr(cp: *const c_char) -> in_addr_t
+    /// struct hostent *gethostbyname(const char *name);
+    pub fn gethostbyname(name: *const libc::c_char) -> *mut libc::hostent;
+    /// htons: H(host byte order) TO N(network byte order) S(short)
+    /// 为了考虑不同操作系统和处理器的大端序小端序可能不同，所以都转成统一的默认的 network byte order
+    pub fn htonl(hostlong: u32) -> u32;
+    pub fn htons(hostshort: u16) -> u16;
 }
 
 #[test]

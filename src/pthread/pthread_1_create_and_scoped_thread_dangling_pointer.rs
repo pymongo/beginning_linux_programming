@@ -1,7 +1,7 @@
 //! ch12/thread1.c
-#![warn(clippy::nursery, clippy::pedantic)]
 use libc::c_void;
 
+#[test] // FIXME thread_2_output is null
 fn main() {
     unsafe {
         main_();
@@ -13,7 +13,6 @@ type Message = [u8; 4];
 // #[no_mangle]
 extern "C" fn thread_2_function(arg: *mut c_void) -> *mut c_void {
     unsafe {
-        // let thread_2_arg = String::from
         println!("thread_2 receive arg = {:?}", *arg.cast::<Message>());
         libc::usleep(10 * 1000);
         let mut thread_2_output = *b"pong";
@@ -43,10 +42,10 @@ unsafe fn main_() {
         thread_2_input.as_mut_ptr().cast(),
     );
     assert_eq!(res, 0);
-    let thread_2_output: *mut *mut c_void = std::ptr::null_mut();
+    let thread_2_output = std::ptr::null_mut();
     // like wait() on child process
     let join_res = libc::pthread_join(thread_2, thread_2_output);
     assert_eq!(join_res, 0);
-    let thread_2_output = *(thread_2_output.cast::<Message>());
+    let thread_2_output = *thread_2_output.cast::<Message>();
     assert_eq!(thread_2_output, *b"pong");
 }

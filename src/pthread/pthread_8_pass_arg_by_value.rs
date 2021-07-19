@@ -1,7 +1,7 @@
 //! ch12/thread8.c
-#![warn(clippy::nursery, clippy::pedantic)]
 use libc::c_void;
 
+#[test]
 fn main() {
     unsafe {
         main_();

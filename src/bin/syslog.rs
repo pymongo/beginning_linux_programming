@@ -1,4 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
     print_all_syslog_level();

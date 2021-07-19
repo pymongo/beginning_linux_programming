@@ -1,0 +1,10 @@
+mod pthread_1_create_and_scoped_thread_dangling_pointer;
+mod pthread_2_thread_share_polling_busy_wait;
+mod pthread_3_binary_semaphore_mutex;
+mod pthread_3_semaphore_producer_consumer;
+mod pthread_4_mutex;
+mod pthread_5_thread_attr_detached;
+mod pthread_6_get_priority;
+mod pthread_7_cancel;
+mod pthread_8_pass_arg_by_value;
+mod pthread_9_cond_wait;

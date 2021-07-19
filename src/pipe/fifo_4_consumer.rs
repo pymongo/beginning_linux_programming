@@ -1,6 +1,5 @@
 //! ch13/fifo4.c
-#![warn(clippy::nursery, clippy::pedantic)]
-
+#[test]
 fn main() {
     unsafe {
         main_();
@@ -9,7 +8,6 @@ fn main() {
 
 const FILE: *const libc::c_char = "/tmp/my_pipe\0".as_ptr().cast();
 
-#[allow(clippy::cast_sign_loss)]
 unsafe fn main_() {
     if libc::access(FILE, libc::F_OK) == -1 {
         // mkfifo

@@ -1,11 +1,5 @@
 //! ch16/client1.c, ch16/server1.c
-#![warn(clippy::nursery, clippy::pedantic)]
-#![allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::doc_markdown
-)]
-
+#[test]
 fn main() {
     unsafe {
         server();
@@ -84,7 +78,7 @@ unsafe fn server() {
         (&mut client_addr as *mut libc::sockaddr_un).cast(),
         &mut peer_addr_len,
     );
-    beginning_linux_programming::print_filename_from_fd(client_socket_fd);
+    crate::print_filename_from_fd(client_socket_fd);
     dbg!(peer_addr_len);
     if client_socket_fd == -1 {
         panic!("{}", std::io::Error::last_os_error());
@@ -112,12 +106,11 @@ unsafe fn server() {
 1. socket(domain, type protocol) -> socket_fd
 2. connect(socket_fd, server_socket_addr, size_of_sockaddr) // connect() and bind() has same arguments
 */
-#[cfg(test)]
 unsafe fn client() {
     // 1. socket(domain, type protocol)
     let socket_fd = libc::socket(libc::AF_UNIX, libc::SOCK_STREAM, 0);
     assert_ne!(socket_fd, -1);
-    beginning_linux_programming::print_filename_from_fd(socket_fd);
+    crate::print_filename_from_fd(socket_fd);
     dbg!(socket_fd);
 
     // 2. connect(socket_fd, sockaddr)

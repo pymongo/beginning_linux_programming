@@ -1,13 +1,7 @@
 //! ch16/server4.c
-#![warn(clippy::nursery, clippy::pedantic)]
-#![allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::doc_markdown
-)]
-use beginning_linux_programming::inet_ntoa;
+use crate::inet_ntoa;
 use libc::{sockaddr_in, socklen_t};
-
+#[test]
 fn main() {
     unsafe {
         server();
@@ -17,7 +11,7 @@ fn main() {
 #[test]
 fn run_client() {
     unsafe {
-        client();
+        super::socket_2_tcp_echo::client();
     }
 }
 
@@ -64,7 +58,7 @@ unsafe fn server() {
         libc::printf(
             "client_addr=%s:%d\n\0".as_ptr().cast(),
             inet_ntoa(client_addr.sin_addr),
-            client_addr.sin_port as libc::c_uint,
+            u32::from(client_addr.sin_port),
         );
 
         if libc::fork() == 0 {
@@ -85,42 +79,4 @@ unsafe fn server() {
         }
     }
     // libc::close(server_socket_fd);
-}
-
-#[cfg(test)]
-unsafe fn client() {
-    // 1. socket
-    let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
-
-    // 2. connect
-    let server_addr = sockaddr_in {
-        sin_family: libc::AF_INET as u16,
-        sin_port: SERVER_PORT,
-        sin_addr: libc::in_addr { s_addr: 0 },
-        sin_zero: [0; 8],
-    };
-    let connect_res = libc::connect(
-        socket_fd,
-        (&server_addr as *const sockaddr_in).cast(),
-        std::mem::size_of_val(&server_addr) as socklen_t,
-    );
-    if connect_res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
-
-    let mut buf = b'a';
-    libc::write(
-        socket_fd,
-        (&buf as *const u8).cast(),
-        std::mem::size_of::<u8>(),
-    );
-    println!("reqeust = {}", buf);
-    libc::read(
-        socket_fd,
-        (&mut buf as *mut u8).cast(),
-        std::mem::size_of::<u8>(),
-    );
-    println!("response = {}", buf);
-
-    libc::close(socket_fd);
 }

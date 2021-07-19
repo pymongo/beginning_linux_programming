@@ -1,4 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
     let mut msg = "parent process";

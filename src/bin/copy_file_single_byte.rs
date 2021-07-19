@@ -1,4 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::doc_markdown)]
 
 /// [cargo target auto-discovery](https://doc.rust-lang.org/cargo/guide/project-layout.html)

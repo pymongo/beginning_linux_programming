@@ -1,15 +1,9 @@
 //! ch16/getdate.c
-#![warn(clippy::nursery, clippy::pedantic)]
-
+#[test] // FIXME port 13 daytime service is not running on manjaro
 fn main() {
     unsafe {
         main_();
     }
-}
-
-#[link(name = "c")]
-extern "C" {
-    fn htons(hostshort: u16) -> u16;
 }
 
 /**
@@ -22,12 +16,12 @@ daytime            13/udp
 unsafe fn main_() {
     let servinfo = *libc::getservbyname("daytime\0".as_ptr().cast(), "tcp\0".as_ptr().cast());
     dbg!(servinfo.s_port);
-    dbg!(htons(servinfo.s_port as u16));
+    dbg!(crate::htons(servinfo.s_port as u16));
 
     let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
     let server_addr = libc::sockaddr_in {
         sin_family: libc::AF_INET as u16,
-        sin_port: htons(servinfo.s_port as u16),
+        sin_port: crate::htons(servinfo.s_port as u16),
         sin_addr: libc::in_addr { s_addr: 0 },
         // Pad to size of `struct sockaddr`
         sin_zero: [0; 8],

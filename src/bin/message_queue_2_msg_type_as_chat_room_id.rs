@@ -1,4 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
 
 #[link(name = "c")]
 extern "C" {

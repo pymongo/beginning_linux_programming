@@ -1,5 +1,5 @@
 //! ch16/server4.c
-
+#[test]
 fn main() {
     unsafe {
         main_();
@@ -7,8 +7,6 @@ fn main() {
 }
 
 unsafe fn main_() {
-    let testfds: libc::fd_set = std::mem::zeroed();
-
     let mut inputs: libc::fd_set = std::mem::zeroed();
     libc::FD_ZERO(&mut inputs);
     libc::FD_SET(libc::STDIN_FILENO, &mut inputs);

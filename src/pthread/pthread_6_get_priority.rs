@@ -1,5 +1,4 @@
 //! ch12/thread6.c
-#![warn(clippy::nursery, clippy::pedantic)]
 use libc::c_void;
 
 /// 由于是更早版本的 Linux 没有这个 API, 为了兼容老的 Linux 机器能编译 libc ，所以没加这个 API
@@ -11,6 +10,7 @@ extern "C" {
     ) -> libc::c_int;
 }
 
+#[test]
 fn main() {
     unsafe {
         main_();

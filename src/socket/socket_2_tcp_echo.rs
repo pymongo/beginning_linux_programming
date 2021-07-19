@@ -1,13 +1,8 @@
 //! ch16/client2.c, ch16/server2.c
-#![warn(clippy::nursery, clippy::pedantic)]
-#![allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::doc_markdown
-)]
-use beginning_linux_programming::inet_ntoa;
+use crate::inet_ntoa;
 use libc::{sockaddr_in, socklen_t};
 
+#[test]
 fn main() {
     unsafe {
         server();
@@ -36,7 +31,7 @@ unsafe fn server() {
         server_socket_fd,
         libc::SOL_SOCKET,
         libc::SO_KEEPALIVE,
-        &1 as *const i32 as *const libc::c_void,
+        (&1 as *const i32).cast::<libc::c_void>(),
         4,
     );
     if res == -1 {
@@ -81,7 +76,7 @@ unsafe fn server() {
     libc::printf(
         "client_addr=%s:%d\n\0".as_ptr().cast(),
         inet_ntoa(client_addr.sin_addr),
-        client_addr.sin_port as libc::c_uint,
+        libc::c_uint::from(client_addr.sin_port),
     );
 
     let mut req_buf = 0_u8;
@@ -102,8 +97,7 @@ unsafe fn server() {
     libc::close(server_socket_fd);
 }
 
-#[cfg(test)]
-unsafe fn client() {
+pub unsafe fn client() {
     // 1. socket
     let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
     // beginning_linux_programming::print_filename_from_fd(socket_fd);

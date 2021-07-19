@@ -1,6 +1,5 @@
 //! ch13/fifo3.c
-#![warn(clippy::nursery, clippy::pedantic)]
-
+#[test]
 fn main() {
     unsafe {
         main_();
@@ -11,7 +10,6 @@ const TOTAL_WRITE_BYTES: usize = libc::PIPE_BUF * 10_usize.pow(3);
 
 const FILE: *const libc::c_char = "/tmp/my_pipe\0".as_ptr().cast();
 
-#[allow(clippy::cast_sign_loss)]
 unsafe fn main_() {
     if libc::access(FILE, libc::F_OK) == -1 {
         // mkfifo

@@ -1,4 +1,4 @@
-#![warn(clippy::nursery, clippy::pedantic)]
+#[test]
 
 fn main() {
     unsafe {

@@ -1,4 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
 use libc::c_int;
 
 fn sigint_handler(_sigint: c_int) {

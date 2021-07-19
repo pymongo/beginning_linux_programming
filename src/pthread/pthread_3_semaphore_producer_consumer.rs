@@ -1,9 +1,8 @@
 //! ch12/thread3.c
-#![warn(clippy::nursery, clippy::pedantic)]
 use libc::{c_void, sem_t};
 
 // static mut BINARY_SEMAPHORE: libc::sem_t = unsafe { std::mem::zeroed() };
-
+#[test] // FIXME process hang
 fn main() {
     unsafe {
         producer();

@@ -1,6 +1,5 @@
 //! ch13/pipe1.c
-#![warn(clippy::nursery, clippy::pedantic)]
-
+#[test]
 fn main() {
     unsafe {
         main_();
