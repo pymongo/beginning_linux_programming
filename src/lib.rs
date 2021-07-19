@@ -39,8 +39,13 @@ extern "C" {
 fn test_inet_aton() {
     unsafe {
         let mut in_addr = std::mem::zeroed();
-        inet_aton("192.168.1.1\0".as_ptr().cast(), &mut in_addr);
+        inet_aton("127.0.0.1\0".as_ptr().cast(), &mut in_addr);
         libc::printf("%s\n\0".as_ptr().cast(), inet_ntoa(in_addr));
+        dbg!(in_addr.s_addr);
+        dbg!(in_addr.s_addr.to_be_bytes());
+        dbg!(in_addr.s_addr.to_le_bytes());
+        dbg!((1_u32 << 24) + 127);
+        assert_eq!(in_addr.s_addr, (1_u32 << 24) + 127);
     }
 }
 
