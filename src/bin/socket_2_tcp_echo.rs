@@ -27,10 +27,21 @@ unsafe fn server() {
     // 1. socket
     let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
     assert_ne!(server_socket_fd, -1);
-    beginning_linux_programming::print_filename_from_fd(server_socket_fd);
     // set server_socket_fd to non-blocking IO
     // let flags = libc::fcntl(server_socket_fd, libc::F_GETFL, 0);
     // libc::fcntl(server_socket_fd, libc::F_SETFL, libc::O_NONBLOCK | flags);
+    // arg value == 1, means true
+    // libc::SO_DEBUG 选项要 sudo 权限
+    let res = libc::setsockopt(
+        server_socket_fd,
+        libc::SOL_SOCKET,
+        libc::SO_KEEPALIVE,
+        &1 as *const i32 as *const libc::c_void,
+        4,
+    );
+    if res == -1 {
+        panic!("{}", std::io::Error::last_os_error());
+    }
 
     // 2. bind
     let server_addr = sockaddr_in {
@@ -95,7 +106,7 @@ unsafe fn server() {
 unsafe fn client() {
     // 1. socket
     let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
-    beginning_linux_programming::print_filename_from_fd(socket_fd);
+    // beginning_linux_programming::print_filename_from_fd(socket_fd);
 
     // 2. connect
     let server_addr = sockaddr_in {
