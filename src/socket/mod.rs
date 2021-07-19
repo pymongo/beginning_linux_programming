@@ -5,7 +5,8 @@ mod socket_4_gethostname;
 mod socket_5_daytime_port_13;
 mod socket_6_fork_multi_clients;
 mod socket_7_select;
-mod socket_8_select_multi_clients;
+mod socket_8_tcp_echo_select;
+mod socket_9_udp_echo;
 
 const SERVER_PORT: u16 = 8080;
 

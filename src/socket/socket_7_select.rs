@@ -1,4 +1,4 @@
-//! ch16/server4.c
+//! ch16/select.c
 #[test]
 fn main() {
     unsafe {

@@ -1,4 +1,4 @@
-//! ch16/server4.c
+//! ch16/server5.c
 use crate::inet_ntoa;
 use libc::{sockaddr_in, socklen_t};
 #[test]
@@ -15,6 +15,7 @@ fn run_client() {
     }
 }
 
+/// netcat localhost 8080 --tcp -vv
 unsafe fn server() {
     // 1. socket
     let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
@@ -77,7 +78,7 @@ unsafe fn server() {
                 libc::FD_CLR(fd, &mut read_fds);
                 break;
             }
-            let mut buf = [0_u8; 8];
+            let mut buf = [0_u8; 256];
             libc::read(fd, buf.as_mut_ptr().cast(), nread);
             println!(
                 "request = {:?}\nresponse = {:?}",
