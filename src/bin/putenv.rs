@@ -1,4 +1,3 @@
-
 fn main() {
     unsafe {
         assert!(std::env::var("key").is_err());

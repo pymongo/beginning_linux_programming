@@ -1,4 +1,3 @@
-
 fn main() {
     unsafe {
         libc::setpwent(); // optional, make pwent cursor to start

@@ -1,4 +1,3 @@
-
 #[link(name = "c")]
 extern "C" {
     /// same as `asctime(localtime(time_t))`

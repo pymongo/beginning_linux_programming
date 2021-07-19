@@ -16,8 +16,6 @@ fn run_client() {
     }
 }
 
-const SERVER_PORT: u16 = 8080;
-
 unsafe fn server() {
     // 1. socket
     let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
@@ -39,13 +37,7 @@ unsafe fn server() {
     }
 
     // 2. bind
-    let server_addr = sockaddr_in {
-        sin_family: libc::AF_INET as u16,
-        sin_port: SERVER_PORT,
-        sin_addr: libc::in_addr { s_addr: 0 },
-        // Pad to size of `struct sockaddr`
-        sin_zero: [0; 8],
-    };
+    let server_addr = super::server_sockaddr_in();
     // The length and format of the address **depend on the address family**.
     // A particular address structure pointer will need to be **cast** to the **generic address** type (struct sockaddr *)
     libc::bind(
@@ -103,13 +95,7 @@ pub unsafe fn client() {
     // beginning_linux_programming::print_filename_from_fd(socket_fd);
 
     // 2. connect
-    let server_addr = sockaddr_in {
-        sin_family: libc::AF_INET as u16,
-        sin_port: SERVER_PORT,
-        sin_addr: libc::in_addr { s_addr: 0 },
-        // Pad to size of `struct sockaddr`
-        sin_zero: [0; 8],
-    };
+    let server_addr = super::server_sockaddr_in();
     let connect_res = libc::connect(
         socket_fd,
         (&server_addr as *const sockaddr_in).cast(),

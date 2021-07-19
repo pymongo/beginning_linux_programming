@@ -12,20 +12,7 @@ fn main() {
 #[test]
 fn run_client() {
     unsafe {
-        client();
-    }
-}
-
-unsafe fn server_sockaddr_in() -> sockaddr_in {
-    sockaddr_in {
-        sin_family: libc::AF_INET as u16,
-        sin_port: crate::htons(8080),
-        // INADDR_ANY is 0.0.0.0
-        sin_addr: libc::in_addr {
-            s_addr: crate::htonl(libc::INADDR_ANY),
-        },
-        // Pad to size of `struct sockaddr`
-        sin_zero: [0; 8],
+        super::socket_2_tcp_echo::client();
     }
 }
 
@@ -34,7 +21,7 @@ unsafe fn server() {
     let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
 
     // 2. bind
-    let server_addr = server_sockaddr_in();
+    let server_addr = super::server_sockaddr_in();
     libc::bind(
         server_socket_fd,
         (&server_addr as *const sockaddr_in).cast(),
@@ -74,36 +61,4 @@ unsafe fn server() {
     libc::close(client_socket_fd);
 
     libc::close(server_socket_fd);
-}
-
-unsafe fn client() {
-    // 1. socket
-    let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
-
-    // 2. connect
-    let server_addr = server_sockaddr_in();
-    let connect_res = libc::connect(
-        socket_fd,
-        (&server_addr as *const sockaddr_in).cast(),
-        std::mem::size_of_val(&server_addr) as socklen_t,
-    );
-    if connect_res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
-
-    let mut buf = b'a';
-    libc::write(
-        socket_fd,
-        (&buf as *const u8).cast(),
-        std::mem::size_of::<u8>(),
-    );
-    println!("reqeust = {}", buf);
-    libc::read(
-        socket_fd,
-        (&mut buf as *mut u8).cast(),
-        std::mem::size_of::<u8>(),
-    );
-    println!("response = {}", buf);
-
-    libc::close(socket_fd);
 }

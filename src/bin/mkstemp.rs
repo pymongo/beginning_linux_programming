@@ -1,4 +1,3 @@
-
 extern "C" {
     fn mktemp(template: *mut libc::c_char) -> *mut libc::c_char;
 }

@@ -15,8 +15,6 @@ fn run_client() {
     }
 }
 
-const SERVER_PORT: u16 = 8080;
-
 unsafe fn server() {
     //  if the parent explicitly ignores SIGCHLD by setting its handler to SIG_IGN
     // (rather than simply ignoring the signal by default) or has the SA_NOCLDWAIT flag set,
@@ -28,12 +26,7 @@ unsafe fn server() {
     assert_ne!(server_socket_fd, -1);
 
     // 2. bind
-    let server_addr = sockaddr_in {
-        sin_family: libc::AF_INET as u16,
-        sin_port: SERVER_PORT,
-        sin_addr: libc::in_addr { s_addr: 0 },
-        sin_zero: [0; 8],
-    };
+    let server_addr = super::server_sockaddr_in();
     libc::bind(
         server_socket_fd,
         (&server_addr as *const sockaddr_in).cast(),

@@ -1,4 +1,3 @@
-
 fn main() {
     print_all_syslog_level();
     unsafe {

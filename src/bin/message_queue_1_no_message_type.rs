@@ -1,4 +1,3 @@
-
 fn main() {
     unsafe {
         run(true);

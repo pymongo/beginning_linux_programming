@@ -1,4 +1,3 @@
-
 fn main() {
     let mut msg = "parent process";
     let mut n_times = 4;

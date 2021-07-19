@@ -11,11 +11,11 @@
 )]
 use libc::{c_char, c_int, in_addr};
 #[cfg(test)]
+mod pipe;
+#[cfg(test)]
 mod pthread;
 #[cfg(test)]
 mod socket;
-#[cfg(test)]
-mod pipe;
 
 /**
 ```text
