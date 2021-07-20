@@ -15,6 +15,7 @@ fn run_client() {
     }
 }
 
+/// telnet 127.0.0.1 8080 # telnet is only TCP
 /// netcat localhost 8080 --tcp -vv
 unsafe fn server() {
     // 1. socket

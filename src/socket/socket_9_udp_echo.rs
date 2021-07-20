@@ -15,7 +15,15 @@ fn run_client() {
     }
 }
 
-/// netcat localhost 8080 --udp -vv
+/**
+如果从连接的角度来看，udp应该不属于双工。
+
+双工的含义是：二台通讯设备之间，允许有双向的资料传输。udp在两台端设备间通信，
+
+但与tcp不同的是，udp需要两次连接。也就是说，每一次连接都是单向传输，所以说udp更偏向单工
+
+> netcat localhost 8080 --udp -vv
+*/
 unsafe fn udp_echo_server() {
     // 1. socket
     //let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_DGRAM, libc::IPPROTO_UDP);
