@@ -1,5 +1,5 @@
 //! ch16/server5.c
-use crate::{inet_ntoa, not_minus_1};
+use crate::{not_minus_1};
 use libc::{sockaddr_in, socklen_t};
 #[test]
 fn main() {
@@ -62,12 +62,12 @@ fn tcp_echo_select_server() {
                     &mut peer_addr_len,
                 ));
                 unsafe {
-                    libc::printf(
-                        "client_addr=%s:%d, client_socket_fd=%d\n\0".as_ptr().cast(),
-                        inet_ntoa(client_addr.sin_addr),
-                        u32::from(client_addr.sin_port),
-                        client_socket_fd,
-                    );
+                    // libc::printf(
+                    //     "client_addr=%s:%d, client_socket_fd=%d\n\0".as_ptr().cast(),
+                    //     crate::inet_ntoa(client_addr.sin_addr),
+                    //     u32::from(client_addr.sin_port),
+                    //     client_socket_fd,
+                    // );
                     // add new client to read_fds, and in next `loop {`(not for loop) we can read client request
                     libc::FD_SET(client_socket_fd, &mut read_fds);
                 }
@@ -77,20 +77,20 @@ fn tcp_echo_select_server() {
             let mut nread: usize = 0;
             not_minus_1!(libc::ioctl(fd, libc::FIONREAD, &mut nread));
             if nread == 0 {
-                println!("receive close from client_socket_fd={}", fd);
+                // println!("receive close from client_socket_fd={}", fd);
                 unsafe {
                     libc::close(fd);
                     libc::FD_CLR(fd, &mut read_fds);
                 }
                 break;
             }
-            let mut buf = [0_u8; 256];
+            let mut buf = [0_u8; 1];
             not_minus_1!(libc::read(fd, buf.as_mut_ptr().cast(), nread));
-            println!(
-                "request = {:?}\nresponse = {:?}",
-                &buf[..nread],
-                &buf[..nread]
-            );
+            // println!(
+            //     "request = {:?}\nresponse = {:?}",
+            //     &buf[..nread],
+            //     &buf[..nread]
+            // );
             not_minus_1!(libc::write(fd, (&buf as *const u8).cast(), nread));
             break;
         }

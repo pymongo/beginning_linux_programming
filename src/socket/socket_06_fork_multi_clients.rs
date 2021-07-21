@@ -1,5 +1,4 @@
 //! ch16/server4.c
-use crate::inet_ntoa;
 use libc::{sockaddr_in, socklen_t};
 #[test]
 fn main() {
@@ -48,28 +47,31 @@ unsafe fn server() {
         if client_socket_fd == -1 {
             panic!("{}", std::io::Error::last_os_error());
         }
-        libc::printf(
-            "client_addr=%s:%d\n\0".as_ptr().cast(),
-            inet_ntoa(client_addr.sin_addr),
-            u32::from(client_addr.sin_port),
-        );
+        // libc::printf(
+        //     "client_addr=%s:%d\n\0".as_ptr().cast(),
+        //     crate::inet_ntoa(client_addr.sin_addr),
+        //     u32::from(client_addr.sin_port),
+        // );
 
         if libc::fork() == 0 {
             let mut req_buf = 0_u8;
-            libc::read(
-                client_socket_fd,
-                (&mut req_buf as *mut u8).cast(),
-                std::mem::size_of::<u8>(),
-            );
-            let resp = req_buf;
-            println!("request = {}\nresponse = {}", req_buf, resp);
-            libc::write(
-                client_socket_fd,
-                (&resp as *const u8).cast(),
-                std::mem::size_of::<u8>(),
-            );
-            libc::close(client_socket_fd);
+            loop {
+                let n_read = libc::read(
+                    client_socket_fd,
+                    (&mut req_buf as *mut u8).cast(),
+                    std::mem::size_of::<u8>(),
+                );
+                if n_read == 0 {
+                    libc::close(client_socket_fd);
+                    break;
+                }
+                // println!("request = {}\nresponse = {}", req_buf, req_buf);
+                libc::write(
+                    client_socket_fd,
+                    (&req_buf as *const u8).cast(),
+                    std::mem::size_of::<u8>(),
+                );
+            }
         }
     }
-    // libc::close(server_socket_fd);
 }
