@@ -1,11 +1,11 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 
-void button_clicked_callback(GtkWidget *button, gpointer data) {
+void button_clicked_callback(const GtkWidget *button, gpointer data) {
     printf("event=clicked, button receive data = %s\n", (char *) data);
 }
 
-void close_app(GtkWidget *window, gpointer data) {
+void close_app(const GtkWidget *window, gpointer data) {
     gtk_main_quit();
 }
 

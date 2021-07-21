@@ -1,12 +1,12 @@
 #include <gtk/gtk.h>
 
-void window_destroy(GtkWidget *window, gpointer data) {
+void window_destroy(const GtkWidget *window, gpointer data) {
     printf("event: window destroy\n");
     gtk_main_quit();
 }
 
 // Callback allows the application to cancel a close/destroy event. (Return TRUE to cancel.)
-gboolean window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer data) {
+gboolean window_delete_event(const GtkWidget *widget, const GdkEvent *event, gpointer data) {
     printf("event: window delete_event\n");
     return FALSE;
 }

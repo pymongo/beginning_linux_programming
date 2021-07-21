@@ -23,3 +23,12 @@ target_link_libraries(gtk_2 ${GTK3_LIBRARIES})
 
 add_executable(gtk_3 gtk_3_container.c)
 target_link_libraries(gtk_3 ${GTK3_LIBRARIES})
+
+add_executable(gtk_4 gtk_4_entry_password_input.c)
+target_link_libraries(gtk_4 ${GTK3_LIBRARIES})
+
+add_executable(gtk_5 gtk_5_spin_button_input_number.c)
+target_link_libraries(gtk_5 ${GTK3_LIBRARIES})
+
+add_executable(gtk_temp gtk_temp.c)
+target_link_libraries(gtk_temp ${GTK3_LIBRARIES})
