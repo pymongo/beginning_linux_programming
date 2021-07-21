@@ -1,3 +1,5 @@
+use beginning_linux_programming::not_minus_1;
+
 fn main() {
     unsafe {
         main_();
@@ -26,16 +28,13 @@ unsafe fn main_() {
             .as_bytes(),
     )
     .unwrap();
-    let read_fd = libc::open(read_path.as_ptr().cast(), libc::O_RDONLY);
-    assert_ne!(read_fd, -1_i32);
-    let write_fd = libc::open(
+
+    let read_fd = not_minus_1!(libc::open(read_path.as_ptr().cast(), libc::O_RDONLY));
+    let write_fd = not_minus_1!(libc::open(
         write_path.as_ptr(),
         libc::O_WRONLY | libc::O_CREAT | libc::O_TRUNC,
         libc::S_IRUSR | libc::S_IWUSR,
-    );
-    if write_fd == -1 {
-        panic!("{:?}", std::io::Error::last_os_error());
-    }
+    ));
 
     let mut buf = [0_u8; BLOCK_SIZE];
     loop {

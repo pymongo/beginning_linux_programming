@@ -7,9 +7,12 @@
     clippy::cast_sign_loss,
     clippy::doc_markdown,
     clippy::missing_panics_doc,
-    clippy::missing_safety_doc
+    clippy::missing_safety_doc,
+    clippy::non_ascii_literal
 )]
 use libc::{c_char, c_int, in_addr};
+// #[macro_use]
+pub mod macros;
 #[cfg(test)]
 mod pipe;
 #[cfg(test)]
@@ -51,6 +54,8 @@ extern "C" {
     pub fn gethostbyname(name: *const libc::c_char) -> *mut libc::hostent;
     /// htons: H(host byte order) TO N(network byte order) S(short)
     /// 为了考虑不同操作系统和处理器的大端序小端序可能不同，所以都转成统一的默认的 network byte order
+    /// 根据 man7.org https://man7.org/linux/man-pages/man3/ntohs.3.html
+    /// network byte order == MSB == bigger-endian
     pub fn htonl(hostlong: u32) -> u32;
     pub fn htons(hostshort: u16) -> u16;
 }

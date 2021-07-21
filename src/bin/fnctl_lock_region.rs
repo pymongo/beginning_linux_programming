@@ -1,4 +1,5 @@
 #![allow(clippy::cast_possible_truncation)]
+use beginning_linux_programming::not_minus_1;
 
 fn main() {
     unsafe {
@@ -39,16 +40,11 @@ unsafe fn set_lock() {
         l_pid: current_pid,
     };
     // F_SETLKW 的唯一区别就是会像自旋锁那样获取失败时不断轮询阻塞线程，直到获取成功，所以获取失败时也不会返回错误码(容易死锁)，W就是wait的意思
-    let ret1 = libc::fcntl(fd, libc::F_SETLK, &shared_immutable_region);
-    if ret1 == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
-    let ret2 = libc::fcntl(fd, libc::F_SETLK, &exclusive_mutable_region);
-    if ret2 == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    not_minus_1!(libc::fcntl(fd, libc::F_SETLK, &shared_immutable_region));
+    not_minus_1!(libc::fcntl(fd, libc::F_SETLK, &exclusive_mutable_region));
+
     println!("process {} is locking the file", libc::getpid());
-    libc::sleep(12);
+    libc::sleep(10);
     libc::close(fd);
     libc::unlink(FILENAME);
 }

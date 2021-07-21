@@ -23,6 +23,7 @@ unsafe fn server() {
     // set server_socket_fd to non-blocking IO
     // let flags = libc::fcntl(server_socket_fd, libc::F_GETFL, 0);
     // libc::fcntl(server_socket_fd, libc::F_SETFL, libc::O_NONBLOCK | flags);
+
     // arg value == 1, means true
     // libc::SO_DEBUG 选项要 sudo 权限
     let res = libc::setsockopt(
@@ -37,7 +38,7 @@ unsafe fn server() {
     }
 
     // 2. bind
-    let server_addr = super::server_sockaddr_in();
+    let server_addr = super::server_default_sockaddr_in();
     // The length and format of the address **depend on the address family**.
     // A particular address structure pointer will need to be **cast** to the **generic address** type (struct sockaddr *)
     libc::bind(
@@ -95,7 +96,7 @@ pub unsafe fn client() {
     // beginning_linux_programming::print_filename_from_fd(socket_fd);
 
     // 2. connect
-    let server_addr = super::server_sockaddr_in();
+    let server_addr = super::server_default_sockaddr_in();
     let connect_res = libc::connect(
         socket_fd,
         (&server_addr as *const sockaddr_in).cast(),

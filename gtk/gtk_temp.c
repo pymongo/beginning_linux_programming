@@ -21,6 +21,6 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(window), spin_button);
     gtk_widget_show_all(window);
     gtk_main();
-
+    PIPE_BUF
     return 0;
 }

@@ -12,7 +12,7 @@ fn main() {
 #[test]
 fn run_client() {
     unsafe {
-        super::socket_2_tcp_echo::client();
+        super::socket_02_tcp_echo::client();
     }
 }
 
@@ -21,7 +21,7 @@ unsafe fn server() {
     let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
 
     // 2. bind
-    let server_addr = super::server_sockaddr_in();
+    let server_addr = super::server_default_sockaddr_in();
     libc::bind(
         server_socket_fd,
         (&server_addr as *const sockaddr_in).cast(),

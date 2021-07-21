@@ -1,5 +1,4 @@
 #[test]
-
 fn main() {
     unsafe {
         main_();
@@ -7,7 +6,7 @@ fn main() {
 }
 
 unsafe fn main_() {
-    let mut buf = [0_u8; libc::PIPE_BUF + 1];
+    let mut buf = [0_u8; libc::PIPE_BUF];
     buf[0] = b'p';
     let fp = libc::popen("od -c\0".as_ptr().cast(), "w\0".as_ptr().cast());
     assert!(!fp.is_null());

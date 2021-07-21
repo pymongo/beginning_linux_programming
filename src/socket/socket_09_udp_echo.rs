@@ -27,10 +27,10 @@ fn run_client() {
 unsafe fn udp_echo_server() {
     // 1. socket
     //let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_DGRAM, libc::IPPROTO_UDP);
-    let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_DGRAM, 0);
+    let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_DGRAM, libc::IPPROTO_IP);
 
     // 2. bind
-    let server_addr = super::server_sockaddr_in();
+    let server_addr = super::server_default_sockaddr_in();
     // The length and format of the address **depend on the address family**.
     // A particular address structure pointer will need to be **cast** to the **generic address** type (struct sockaddr *)
     let bind_res = libc::bind(
@@ -53,7 +53,7 @@ unsafe fn udp_echo_server() {
             buf.as_mut_ptr().cast(),
             buf.len(),
             0,
-            &mut client_addr as *mut sockaddr_in as *mut libc::sockaddr,
+            (&mut client_addr as *mut sockaddr_in).cast::<libc::sockaddr>(),
             &mut client_addr_len,
         );
         libc::printf(
@@ -80,7 +80,7 @@ pub unsafe fn udp_echo_client() {
     // beginning_linux_programming::print_filename_from_fd(socket_fd);
 
     // 2. connect
-    let mut server_addr = super::server_sockaddr_in();
+    let mut server_addr = super::server_default_sockaddr_in();
     let connect_res = libc::connect(
         socket_fd,
         (&server_addr as *const sockaddr_in).cast(),
