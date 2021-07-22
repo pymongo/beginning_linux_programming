@@ -7,7 +7,7 @@ mod socket_06_fork_multi_clients;
 mod socket_07_select;
 mod socket_08_select_tcp_echo;
 mod socket_09_udp_echo;
-mod socket_10_epoll_tcp_echo;
+mod socket_11_accept_async_reactor_wake_future;
 
 const SERVER_PORT: u16 = 8080;
 

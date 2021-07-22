@@ -6,5 +6,6 @@ edition = "2018"
 [dependencies]
 libc = "0.2"
 
-# [dev-dependencies]
+[dev-dependencies]
+futures = "0.3"
 # gtk4 = "0.2"
