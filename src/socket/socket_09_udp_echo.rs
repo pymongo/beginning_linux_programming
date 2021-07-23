@@ -2,6 +2,7 @@ use crate::inet_ntoa;
 use libc::{sockaddr_in, socklen_t};
 
 #[test]
+#[ignore = "must run both server and client"]
 fn main() {
     unsafe {
         udp_echo_server();
@@ -9,6 +10,7 @@ fn main() {
 }
 
 #[test]
+#[ignore = "must run both server and client"]
 fn run_client() {
     unsafe {
         udp_echo_client();

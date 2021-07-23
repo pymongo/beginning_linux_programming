@@ -27,11 +27,13 @@ use crate::not_minus_1;
 use std::os::unix::prelude::RawFd;
 
 #[test]
+#[ignore = "must run both server and client"]
 fn run_non_blocking() {
     reactor_main_loop(true);
 }
 
 #[test]
+#[ignore = "must run both server and client"]
 fn run_blocking() {
     reactor_main_loop(false);
 }

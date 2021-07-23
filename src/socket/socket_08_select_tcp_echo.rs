@@ -2,11 +2,13 @@
 use crate::not_minus_1;
 use libc::{sockaddr_in, socklen_t};
 #[test]
+#[ignore = "must run both server and client"]
 fn main() {
     tcp_echo_select_server();
 }
 
 #[test]
+#[ignore = "must run both server and client"]
 fn run_client() {
     unsafe {
         super::socket_02_tcp_echo::client();

@@ -1,5 +1,6 @@
 //! ch16/client1.c, ch16/server1.c
 #[test]
+#[ignore = "must run both server and client"]
 fn main() {
     unsafe {
         server();
@@ -7,6 +8,7 @@ fn main() {
 }
 
 #[test]
+#[ignore = "must run both server and client"]
 fn run_client() {
     unsafe {
         client();
