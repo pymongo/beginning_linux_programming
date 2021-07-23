@@ -30,5 +30,8 @@ target_link_libraries(gtk_4 ${GTK3_LIBRARIES})
 add_executable(gtk_5 gtk_5_spin_button_input_number.c)
 target_link_libraries(gtk_5 ${GTK3_LIBRARIES})
 
+add_executable(gtk_6 gtk_6_radio_button.c)
+target_link_libraries(gtk_6 ${GTK3_LIBRARIES})
+
 add_executable(gtk_temp gtk_temp.c)
 target_link_libraries(gtk_temp ${GTK3_LIBRARIES})
