@@ -19,6 +19,7 @@ argument: "hi there"
 ```
 */
 #[test]
+#[allow(clippy::similar_names)]
 fn main() {
     let argv = vec![
         "argv[0]",

@@ -5,6 +5,7 @@
 #[macro_export]
 macro_rules! not_minus_1 {
     ( $expression:expr ) => {{
+        #[allow(unused_unsafe)]
         let return_val = unsafe { $expression };
         if return_val == -1 {
             panic!(

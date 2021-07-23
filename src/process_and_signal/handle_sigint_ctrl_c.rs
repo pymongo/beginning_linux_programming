@@ -10,6 +10,7 @@ fn sigint_handler(_sigint: c_int) {
 }
 
 /// send a Ctrl-C signal example: `kill -INT 1038868`
+#[test]
 fn main() {
     let pid = unsafe { libc::getpid() };
     println!("PID = {}", pid);

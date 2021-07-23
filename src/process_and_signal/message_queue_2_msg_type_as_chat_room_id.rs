@@ -5,6 +5,7 @@ extern "C" {
 }
 
 /// must run receiver first
+#[test]
 fn main() {
     unsafe {
         run(true);

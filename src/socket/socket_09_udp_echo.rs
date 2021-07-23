@@ -73,7 +73,6 @@ unsafe fn udp_echo_server() {
         );
         assert_eq!(n_read, n_write);
     }
-    // libc::close(server_socket_fd);
 }
 
 pub unsafe fn udp_echo_client() {

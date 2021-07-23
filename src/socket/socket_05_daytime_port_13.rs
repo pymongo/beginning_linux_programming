@@ -29,7 +29,7 @@ unsafe fn main_() {
     let res = libc::connect(
         socket_fd,
         (&server_addr as *const libc::sockaddr_in).cast(),
-        std::mem::size_of_val(&server_addr) as libc::socklen_t,
+        crate::SOCKADDR_IN_LEN,
     );
     if res == -1 {
         panic!("{}", std::io::Error::last_os_error());

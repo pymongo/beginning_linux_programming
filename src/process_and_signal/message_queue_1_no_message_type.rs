@@ -1,3 +1,4 @@
+#[test]
 fn main() {
     unsafe {
         run(true);

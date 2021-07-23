@@ -8,7 +8,7 @@ mod socket_07_select;
 mod socket_08_select_tcp_echo;
 mod socket_09_udp_echo;
 mod socket_11_accept_async_reactor_wake_future;
-mod socket_12_ping;
+mod socket_12_ping_icmp_protocol;
 
 const SERVER_PORT: u16 = 8080;
 

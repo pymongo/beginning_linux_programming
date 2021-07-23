@@ -101,9 +101,6 @@ impl Epoll {
     }
 }
 
-const SOCKADDR_INET_SIZE: libc::socklen_t =
-    std::mem::size_of::<libc::sockaddr_in>() as libc::socklen_t;
-
 /// 完成 std::net::TcpListener::bind() 的操作，并返回 server 的 socket_fd
 fn bind_listen_default_port() -> RawFd {
     let server_socket_fd = not_minus_1!(libc::socket(
@@ -115,7 +112,7 @@ fn bind_listen_default_port() -> RawFd {
     not_minus_1!(libc::bind(
         server_socket_fd,
         (&server_addr as *const libc::sockaddr_in).cast(),
-        SOCKADDR_INET_SIZE,
+        crate::SOCKADDR_IN_LEN,
     ));
     // https://github.com/rust-lang/rust/blob/db492ecd5ba6bd82205612cebb9034710653f0c2/library/std/src/sys_common/net.rs#L386
     // std::net::TcpListener default backlog is 128
@@ -134,7 +131,7 @@ fn set_nonblocking(fd: RawFd) {
 fn accept(server_socket_fd: RawFd) -> RawFd {
     let mut client_addr: libc::sockaddr_in = unsafe { std::mem::zeroed() };
     // client_addr == peer_addr
-    let mut peer_addr_len = std::mem::size_of_val(&client_addr) as libc::socklen_t;
+    let mut peer_addr_len = crate::SOCKADDR_IN_LEN;
     let client_socket_fd = not_minus_1!(libc::accept(
         server_socket_fd,
         (&mut client_addr as *mut libc::sockaddr_in).cast(),
@@ -188,9 +185,7 @@ fn reactor_main_loop(is_non_blocking: bool) {
             let mut buf = [0_u8; 1];
             let n_read = unsafe { libc::read(fd, buf.as_mut_ptr().cast(), buf.len()) };
             if n_read == -1 {
-                if unsafe { *libc::__errno_location() } == libc::EAGAIN {
-                    panic!();
-                }
+                panic!();
             } else if n_read == 0 {
                 // The remote has closed the connection
                 // println!("receive close from client_socket_fd={}", fd);

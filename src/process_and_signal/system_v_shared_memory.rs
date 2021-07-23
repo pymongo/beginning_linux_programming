@@ -1,5 +1,5 @@
 //! ch14/shm1.c and ch14/shm2.c
-
+#[test]
 fn main() {
     unsafe {
         run(true);

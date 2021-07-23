@@ -61,7 +61,7 @@ unsafe fn server() {
     let bind_res = libc::bind(
         server_socket_fd,
         (&server_addr as *const libc::sockaddr_un).cast(),
-        std::mem::size_of_val(&server_addr) as libc::socklen_t,
+        crate::SOCKADDR_IN_LEN,
     );
     if bind_res == -1 {
         panic!("{}", std::io::Error::last_os_error());
@@ -73,7 +73,7 @@ unsafe fn server() {
 
     // 4. accept
     let mut client_addr: libc::sockaddr_un = std::mem::zeroed();
-    let mut peer_addr_len = std::mem::size_of_val(&client_addr) as libc::socklen_t;
+    let mut peer_addr_len = crate::SOCKADDR_IN_LEN;
     dbg!(peer_addr_len);
     let client_socket_fd = libc::accept(
         server_socket_fd,
@@ -130,7 +130,7 @@ unsafe fn client() {
     let connect_res = libc::connect(
         socket_fd,
         (&server_addr as *const libc::sockaddr_un).cast(),
-        std::mem::size_of_val(&server_addr) as libc::socklen_t,
+        crate::SOCKADDR_IN_LEN,
     );
     if connect_res == -1 {
         panic!("{}", std::io::Error::last_os_error());
