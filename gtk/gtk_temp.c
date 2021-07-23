@@ -5,7 +5,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/ip_icmp.h>
+#include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 
 #define PACKETSIZE  64
 struct packet {
@@ -40,7 +42,7 @@ unsigned short checksum(void *b, int len) {
 /*--- ping - Create message and send it.                           ---*/
 /*    return 0 is ping Ok, return 1 is ping not OK.                ---*/
 /*--------------------------------------------------------------------*/
-int ping(char *adress) {
+bool ping(char *adress) {
     const int val = 255;
     int i, sd;
     struct packet pckt;
@@ -62,22 +64,21 @@ int ping(char *adress) {
     sd = socket(PF_INET, SOCK_RAW, proto->p_proto);
     if (sd < 0) {
         perror("socket");
-        return 1;
+        return false;
     }
     if (setsockopt(sd, SOL_IP, IP_TTL, &val, sizeof(val)) != 0) {
         perror("Set TTL option");
-        return 1;
+        return false;
     }
     if (fcntl(sd, F_SETFL, O_NONBLOCK) != 0) {
         perror("Request nonblocking I/O");
-        return 1;
+        return false;
     }
 
-    for (loop = 0; loop < 5; loop++) {
+    for (loop = 0; loop < 10; loop++) {
         int len = sizeof(r_addr);
-
         if (recvfrom(sd, &pckt, sizeof(pckt), 0, (struct sockaddr *) &r_addr, &len) > 0) {
-            return 0;
+            return true;
         }
 
         bzero(&pckt, sizeof(pckt));
@@ -90,18 +91,16 @@ int ping(char *adress) {
         pckt.hdr.checksum = checksum(&pckt, sizeof(pckt));
         if (sendto(sd, &pckt, sizeof(pckt), 0, (struct sockaddr *) addr, sizeof(*addr)) <= 0)
             perror("sendto");
-
-        usleep(300000);
-
+        usleep(300*1000);
     }
-
-    return 1;
+    return false;
 }
 
 int main(int argc, char *argv[]) {
-    if (ping("www.google.com"))
-        printf("Ping is not OK. \n");
-    else
+    if (ping("www.rust-lang.com") == true) {
         printf("Ping is OK. \n");
+    } else {
+        printf("Ping is not OK. \n");
+    }
     return 0;
 }
