@@ -1,4 +1,5 @@
 fn main() {
+    // catch_unwind 类似其它语言 try..catch 的 catch
     assert!(std::panic::catch_unwind(|| {
         panic!("oh no");
     })
