@@ -18,6 +18,7 @@ unknown option: q
 argument: "hi there"
 ```
 */
+#[test]
 fn main() {
     let argv = vec![
         "argv[0]",

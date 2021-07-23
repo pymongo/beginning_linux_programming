@@ -22,6 +22,8 @@ mod process_and_signal;
 mod pthread;
 #[cfg(test)]
 mod socket;
+#[cfg(test)]
+mod terminal;
 
 /**
 ```text
@@ -34,11 +36,6 @@ MariaDB [test]> select inet_aton("192.168.1.1");
 1 row in set (0.000 sec)
 
 MariaDB [test]> select inet_ntoa(3232235777);
-+-----------------------+
-| inet_ntoa(3232235777) |
-+-----------------------+
-| 192.168.1.1           |
-+-----------------------+
 ```
 */
 #[link(name = "c")]
@@ -53,7 +50,6 @@ extern "C" {
     pub fn inet_ntoa(in_: in_addr) -> *mut c_char;
     // inet_addr 是 inet_aton 完全不考虑字符串解析错误的版本
     // fn inet_addr(cp: *const c_char) -> in_addr_t
-    /// struct hostent *gethostbyname(const char *name);
     pub fn gethostbyname(name: *const c_char) -> *mut libc::hostent;
     /// htons: H(host byte order) TO N(network byte order) S(short)
     /// 为了考虑不同操作系统和处理器的大端序小端序可能不同，所以都转成统一的默认的 network byte order
