@@ -23,6 +23,6 @@ fn foo() -> anyhow::Result<()> {
 fn bar() -> anyhow::Result<RawFd> {
     match unsafe { libc::open("/tmp/no_exist\0".as_ptr().cast(), libc::O_RDONLY) } {
         -1 => Err(std::io::Error::last_os_error().into()),
-        fd => Ok(fd)
+        fd => Ok(fd),
     }
 }

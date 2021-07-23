@@ -1,8 +1,9 @@
-cargo-features = ["edition2021"]
+# cargo-features = ["edition2021"]
 [package]
 name = "beginning_linux_programming"
 version = "0.1.0"
-edition = "2021"
+# edition = "2021"
+edition = "2018"
 
 [dependencies]
 libc = "0.2"

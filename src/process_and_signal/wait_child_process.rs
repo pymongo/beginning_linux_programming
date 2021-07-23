@@ -1,6 +1,7 @@
+#[test]
 fn main() {
     let mut msg = "parent process";
-    let mut n_times = 4;
+    let mut n_times = 1;
     let mut child_process_pid = -1;
     let mut exit_code = libc::EXIT_SUCCESS;
     println!("before fork");
@@ -12,10 +13,7 @@ fn main() {
         },
         0 => {
             msg = "child process";
-            // child exit while parent still sleeping
-            // but parent need child keep it's exit_code until parent call wait
-            // so child is a zombie process now
-            n_times = 1;
+            n_times = 3;
             exit_code = 37;
         }
         fork_ret_child_process_pid => {

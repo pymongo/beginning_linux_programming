@@ -17,6 +17,8 @@ pub mod macros;
 #[cfg(test)]
 mod pipe;
 #[cfg(test)]
+mod process_and_signal;
+#[cfg(test)]
 mod pthread;
 #[cfg(test)]
 mod socket;
@@ -52,7 +54,7 @@ extern "C" {
     // inet_addr 是 inet_aton 完全不考虑字符串解析错误的版本
     // fn inet_addr(cp: *const c_char) -> in_addr_t
     /// struct hostent *gethostbyname(const char *name);
-    pub fn gethostbyname(name: *const libc::c_char) -> *mut libc::hostent;
+    pub fn gethostbyname(name: *const c_char) -> *mut libc::hostent;
     /// htons: H(host byte order) TO N(network byte order) S(short)
     /// 为了考虑不同操作系统和处理器的大端序小端序可能不同，所以都转成统一的默认的 network byte order
     /// 根据 man7.org https://man7.org/linux/man-pages/man3/ntohs.3.html
@@ -60,6 +62,9 @@ extern "C" {
     pub fn htonl(hostlong: u32) -> u32;
     pub fn htons(hostshort: u16) -> u16;
 }
+
+pub const SOCKADDR_IN_LEN: libc::socklen_t =
+    std::mem::size_of::<libc::sockaddr_in>() as libc::socklen_t;
 
 #[test]
 fn test_inet_aton() {

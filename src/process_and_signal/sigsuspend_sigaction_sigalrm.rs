@@ -1,3 +1,4 @@
+#[test]
 fn main() {
     unsafe {
         main_();
@@ -6,6 +7,7 @@ fn main() {
 
 static mut ALARM_FIRED: bool = false;
 
+/// alarm 系统调用可以实现 js setTimeout 的效果，但是一个进程只能有一个 alarm 定时器
 fn sigalrm_handler(_sig: i32) {
     unsafe {
         ALARM_FIRED = true;

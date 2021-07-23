@@ -46,7 +46,7 @@ unsafe fn server() {
     libc::bind(
         server_socket_fd,
         (&server_addr as *const sockaddr_in).cast(),
-        std::mem::size_of_val(&server_addr) as socklen_t,
+        crate::SOCKADDR_IN_LEN,
     );
 
     // 3. listen, create a queue to store pending requests
@@ -102,7 +102,7 @@ pub unsafe fn client() {
     let connect_res = libc::connect(
         socket_fd,
         (&server_addr as *const sockaddr_in).cast(),
-        std::mem::size_of_val(&server_addr) as socklen_t,
+        crate::SOCKADDR_IN_LEN,
     );
     if connect_res == -1 {
         panic!("{}", std::io::Error::last_os_error());

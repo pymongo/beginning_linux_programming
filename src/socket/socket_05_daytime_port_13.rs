@@ -20,7 +20,7 @@ unsafe fn main_() {
 
     let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
     let server_addr = libc::sockaddr_in {
-        sin_family: libc::AF_INET as u16,
+        sin_family: libc::AF_INET as libc::sa_family_t,
         sin_port: crate::htons(servinfo.s_port as u16),
         sin_addr: libc::in_addr { s_addr: 0 },
         // Pad to size of `struct sockaddr`

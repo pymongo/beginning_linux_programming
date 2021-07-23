@@ -15,22 +15,22 @@ include_directories(${GTK3_INCLUDE_DIRS})
 # gcc gtk1.c `pkgconf --cflags --libs gtk4`
 # or
 # gcc `pkg-config --cflags gtk+-3.0` -o gtk1 gtk1.c `pkg-config --libs gtk+-3.0`
-add_executable(gtk_1 gtk_1_window.c)
+add_executable(gtk_1 gtk_01_window.c)
 target_link_libraries(gtk_1 ${GTK3_LIBRARIES})
 
-add_executable(gtk_2 gtk_2_button_signal_callback.c)
+add_executable(gtk_2 gtk_02_button_signal_callback.c)
 target_link_libraries(gtk_2 ${GTK3_LIBRARIES})
 
-add_executable(gtk_3 gtk_3_container.c)
+add_executable(gtk_3 gtk_03_container.c)
 target_link_libraries(gtk_3 ${GTK3_LIBRARIES})
 
-add_executable(gtk_4 gtk_4_entry_password_input.c)
+add_executable(gtk_4 gtk_04_entry_password_input.c)
 target_link_libraries(gtk_4 ${GTK3_LIBRARIES})
 
-add_executable(gtk_5 gtk_5_spin_button_input_number.c)
+add_executable(gtk_5 gtk_05_spin_button_input_number.c)
 target_link_libraries(gtk_5 ${GTK3_LIBRARIES})
 
-add_executable(gtk_6 gtk_6_radio_button.c)
+add_executable(gtk_6 gtk_06_radio_button.c)
 target_link_libraries(gtk_6 ${GTK3_LIBRARIES})
 
 add_executable(gtk_temp gtk_temp.c)

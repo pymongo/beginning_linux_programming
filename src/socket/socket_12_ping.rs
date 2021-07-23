@@ -1,9 +1,7 @@
-use beginning_linux_programming::{gethostbyname, inet_ntoa, SOCKADDR_IN_LEN};
-
 unsafe fn nslookup(hostname: &str) -> libc::sockaddr_in {
     let hostname = std::ffi::CString::new(hostname).unwrap();
     let hostname = hostname.as_ptr().cast();
-    let hostent = gethostbyname(hostname);
+    let hostent = crate::gethostbyname(hostname);
     if hostent.is_null() {
         panic!("Invalid hostname or DNS lookup lookup failed");
     }
@@ -13,7 +11,7 @@ unsafe fn nslookup(hostname: &str) -> libc::sockaddr_in {
     libc::printf(
         "PING %s (%s) 64 bytes of data\n\0".as_ptr().cast(),
         hostname,
-        inet_ntoa(remote_addr),
+        crate::inet_ntoa(remote_addr),
     );
     libc::sockaddr_in {
         sin_family: libc::AF_INET as libc::sa_family_t,
@@ -33,6 +31,7 @@ struct icmphdr {
 
 const ICMP_ECHO: u8 = 8;
 
+#[test]
 fn main() {
     unsafe {
         let remote_addr = nslookup("baidu.com");
@@ -53,9 +52,8 @@ fn main() {
             std::mem::size_of::<icmphdr>(),
             0,
             (&remote_addr as *const libc::sockaddr_in).cast::<libc::sockaddr>(),
-            SOCKADDR_IN_LEN,
+            crate::SOCKADDR_IN_LEN,
         );
-        dbg!(a);
         if a == -1 {
             libc::perror(std::ptr::null());
         }
