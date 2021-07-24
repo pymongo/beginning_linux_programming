@@ -1,5 +1,5 @@
 //! ch16/client2.c, ch16/server2.c
-use crate::inet_ntoa;
+use crate::{inet_ntoa, syscall};
 use libc::{sockaddr_in, socklen_t};
 
 #[test]
@@ -20,24 +20,20 @@ fn run_client() {
 
 unsafe fn server() {
     // 1. socket
-    let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
-    assert_ne!(server_socket_fd, -1);
+    let server_socket_fd = syscall!(socket(libc::AF_INET, libc::SOCK_STREAM, 0));
     // set server_socket_fd to non-blocking IO
     // let flags = libc::fcntl(server_socket_fd, libc::F_GETFL, 0);
     // libc::fcntl(server_socket_fd, libc::F_SETFL, libc::O_NONBLOCK | flags);
 
     // arg value == 1, means true
     // libc::SO_DEBUG 选项要 sudo 权限
-    let res = libc::setsockopt(
+    syscall!(setsockopt(
         server_socket_fd,
         libc::SOL_SOCKET,
         libc::SO_KEEPALIVE,
         (&1 as *const i32).cast::<libc::c_void>(),
         4,
-    );
-    if res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    ));
 
     // 2. bind
     let server_addr = super::server_default_sockaddr_in();
@@ -60,14 +56,11 @@ unsafe fn server() {
     // client connect() syscall has a timeout
     let mut client_addr: sockaddr_in = std::mem::zeroed();
     let mut peer_addr_len = std::mem::size_of_val(&client_addr) as socklen_t;
-    let client_socket_fd = libc::accept(
+    let client_socket_fd = syscall!(accept(
         server_socket_fd,
         (&mut client_addr as *mut sockaddr_in).cast(),
         &mut peer_addr_len,
-    );
-    if client_socket_fd == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    ));
     libc::printf(
         "client_addr=%s:%d\n\0".as_ptr().cast(),
         inet_ntoa(client_addr.sin_addr),
@@ -99,14 +92,11 @@ pub unsafe fn client() {
 
     // 2. connect
     let server_addr = super::server_default_sockaddr_in();
-    let connect_res = libc::connect(
+    crate::syscall!(connect(
         socket_fd,
         (&server_addr as *const sockaddr_in).cast(),
         crate::SOCKADDR_IN_LEN,
-    );
-    if connect_res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    ));
 
     let mut buf = b'a';
     libc::write(

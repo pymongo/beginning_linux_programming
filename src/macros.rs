@@ -1,3 +1,4 @@
+/// call to non-libc function
 /// 这个宏是为了实现对系统调用错误处理代码复用: 系统调用返回 -1 表示错误发生
 /// 但是现有的 Rust 类型系统并不能抽象出这样一类函数: 任意参数类型和个数，返回值是 i32 或 isize
 /// 参考 tokio/mio 代码这种系统调用错误处理代码只能通过宏去复用
@@ -12,18 +13,33 @@ macro_rules! not_minus_1 {
                 "error on `{}`: {}",
                 stringify!($expression),
                 std::io::Error::last_os_error()
-            );
+            )
         } else {
             return_val
         }
     }};
 }
 
+/// call to libc's function
+#[macro_export]
+macro_rules! syscall {
+    ($fun:ident ( $($arg:expr),* $(,)* )) => {
+        {
+            #[allow(unused_unsafe)]
+            let res = unsafe { libc::$fun($($arg),*) };
+            if res == -1 {
+                // Err(std::io::Error::last_os_error())
+                panic!("{}", std::io::Error::last_os_error())
+            } else {
+                // Ok(res)
+                res
+            }
+        }
+    };
+}
+
 #[test]
 #[should_panic]
 fn test_ret_not_minus_1() {
-    not_minus_1!(libc::open(
-        "/tmp/no_exist\0".as_ptr().cast(),
-        libc::O_RDONLY
-    ));
+    syscall!(open("/tmp/no_exist\0".as_ptr().cast(), libc::O_RDONLY));
 }

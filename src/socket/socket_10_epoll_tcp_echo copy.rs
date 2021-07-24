@@ -51,14 +51,14 @@ struct Epoll {
 impl Default for Epoll {
     fn default() -> Self {
         Self {
-            epoll_fd: not_minus_1!(libc::epoll_create1(0)),
+            epoll_fd: syscall!(epoll_create1(0)),
         }
     }
 }
 
 impl Drop for Epoll {
     fn drop(&mut self) {
-        not_minus_1!(libc::close(self.epoll_fd));
+        syscall!(close(self.epoll_fd));
     }
 }
 
@@ -83,7 +83,7 @@ impl Epoll {
     }
 
     fn add_event(&self, fd: RawFd, event_type: libc::c_int) {
-        not_minus_1!(libc::epoll_ctl(
+        syscall!(epoll_ctl(
             self.epoll_fd,
             libc::EPOLL_CTL_ADD,
             fd,
@@ -92,7 +92,7 @@ impl Epoll {
     }
 
     fn remove_event(&self, fd: RawFd) {
-        not_minus_1!(libc::epoll_ctl(
+        syscall!(epoll_ctl(
             self.epoll_fd,
             libc::EPOLL_CTL_DEL,
             fd,
@@ -103,27 +103,27 @@ impl Epoll {
 
 /// 完成 std::net::TcpListener::bind() 的操作，并返回 server 的 socket_fd
 fn bind_listen_default_port() -> RawFd {
-    let server_socket_fd = not_minus_1!(libc::socket(
+    let server_socket_fd = syscall!(socket(
         libc::AF_INET,
         libc::SOCK_STREAM,
         libc::IPPROTO_IP
     ));
     let server_addr = super::server_default_sockaddr_in();
-    not_minus_1!(libc::bind(
+    syscall!(bind(
         server_socket_fd,
         (&server_addr as *const libc::sockaddr_in).cast(),
         crate::SOCKADDR_IN_LEN,
     ));
     // https://github.com/rust-lang/rust/blob/db492ecd5ba6bd82205612cebb9034710653f0c2/library/std/src/sys_common/net.rs#L386
     // std::net::TcpListener default backlog is 128
-    not_minus_1!(libc::listen(server_socket_fd, 128));
+    syscall!(listen(server_socket_fd, 128));
     // set_nonblocking(server_socket_fd);
     server_socket_fd
 }
 
 fn set_nonblocking(fd: RawFd) {
-    let flags = not_minus_1!(libc::fcntl(fd, libc::F_GETFL, 0));
-    not_minus_1!(libc::fcntl(fd, libc::F_SETFL, libc::O_NONBLOCK | flags));
+    let flags = syscall!(fcntl(fd, libc::F_GETFL, 0));
+    syscall!(fcntl(fd, libc::F_SETFL, libc::O_NONBLOCK | flags));
 }
 
 /// input_arg: server_fd, return client_socket_fd
@@ -132,7 +132,7 @@ fn accept(server_socket_fd: RawFd) -> RawFd {
     let mut client_addr: libc::sockaddr_in = unsafe { std::mem::zeroed() };
     // client_addr == peer_addr
     let mut peer_addr_len = crate::SOCKADDR_IN_LEN;
-    let client_socket_fd = not_minus_1!(libc::accept(
+    let client_socket_fd = syscall!(accept(
         server_socket_fd,
         (&mut client_addr as *mut libc::sockaddr_in).cast(),
         &mut peer_addr_len,
@@ -164,7 +164,7 @@ fn reactor_main_loop(is_non_blocking: bool) {
     // the event loop
     loop {
         // epoll_wait's timeout arg -1 means to block indefinitely(no timeout)
-        let events_len = not_minus_1!(libc::epoll_wait(
+        let events_len = syscall!(epoll_wait(
             epoll.epoll_fd,
             events.as_mut_ptr(),
             libc::FD_SETSIZE as i32,
@@ -191,11 +191,11 @@ fn reactor_main_loop(is_non_blocking: bool) {
                 // println!("receive close from client_socket_fd={}", fd);
                 // epoll.remove_event(fd);
                 epoll.remove_event(fd);
-                not_minus_1!(libc::close(fd));
+                syscall!(close(fd));
             } else {
-                let n_write = not_minus_1!(libc::write(fd, buf.as_ptr().cast(), n_read as usize));
+                let n_write = syscall!(write(fd, buf.as_ptr().cast(), n_read as usize));
                 assert_eq!(n_read, n_write);
-                // not_minus_1!(libc::printf(
+                // syscall!(printf(
                 //     "received:  %s\nsend back: %s\n\0".as_ptr().cast(),
                 //     buf.as_ptr().cast::<libc::c_char>(),
                 //     buf.as_ptr().cast::<libc::c_char>()

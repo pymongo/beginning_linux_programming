@@ -5,6 +5,8 @@ mod message_queue_1_no_message_type;
 mod message_queue_2_msg_type_as_chat_room_id;
 mod pexec;
 mod process_priority;
+mod reload_config_file_by_inotify_watch;
+mod reload_config_file_by_signal;
 mod sigsuspend_sigaction_sigalrm;
 mod system_v_shared_memory;
 mod wait_child_process;

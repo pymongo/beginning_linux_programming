@@ -13,7 +13,7 @@
 )]
 use libc::{c_char, c_int, in_addr};
 // #[macro_use]
-pub mod macros;
+mod macros;
 #[cfg(test)]
 mod pipe;
 #[cfg(test)]
@@ -76,17 +76,18 @@ fn test_inet_aton() {
     }
 }
 
-pub unsafe fn print_filename_from_fd(fd: i32) {
+pub fn print_filename_from_fd(fd: i32) {
     // linux/limits.h
     const NAME_MAX: usize = 255;
     // /proc/self is symbolic link to /proc/$PID
     // /proc/self/fd/$FD 一般都是一个软链接，如果是 socket/pipe 则会长这个样子: socket:[3428314]
     let fd_path = format!("/proc/self/fd/{}\0", fd);
     let mut buf = [0_u8; NAME_MAX];
-    let n_read = libc::readlink(fd_path.as_ptr().cast(), buf.as_mut_ptr().cast(), NAME_MAX);
-    if n_read == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
-    let path = String::from_utf8_unchecked(buf[..n_read as usize].to_vec());
+    let n_read = syscall!(readlink(
+        fd_path.as_ptr().cast(),
+        buf.as_mut_ptr().cast(),
+        NAME_MAX
+    ));
+    let path = unsafe { String::from_utf8_unchecked(buf[..n_read as usize].to_vec()) };
     dbg!(path);
 }

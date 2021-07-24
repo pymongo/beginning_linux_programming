@@ -1,89 +1,64 @@
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/ip_icmp.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <linux/inotify.h>
 
-struct packet {
-    struct icmphdr hdr;
-    char msg[64 - sizeof(struct icmphdr)];
-};
+#define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 
-// checksum - standard 1s complement checksum
-unsigned short checksum(void *b, int len) {
-    unsigned short *buf = b;
-    unsigned int sum = 0;
-    unsigned short result;
+int main( )
+{
+    int length, i = 0;
+    int fd;
+    int wd;
+    char buffer[EVENT_BUF_LEN];
 
-    for (sum = 0; len > 1; len -= 2)
-        sum += *buf++;
-    if (len == 1)
-        sum += *(unsigned char *) buf;
-    sum = (sum >> 16) + (sum & 0xFFFF);
-    sum += (sum >> 16);
-    result = ~sum;
-    return result;
-}
+    /*creating the INOTIFY instance*/
+    fd = inotify_init();
 
-bool ping(char *adress) {
-    struct sockaddr_in r_addr;
-    struct sockaddr_in addr_ping, *addr;
-    struct hostent *hname = gethostbyname(adress);
-    bzero(&addr_ping, sizeof(addr_ping));
-    addr_ping.sin_family = hname->h_addrtype;
-    addr_ping.sin_port = 0;
-    addr_ping.sin_addr.s_addr = *(long *) hname->h_addr;
-    addr = &addr_ping;
-
-    int sd = socket(PF_INET, SOCK_RAW, IPPROTO_ICMP);
-    if (sd < 0) {
-        perror("socket");
-        return false;
-    }
-    if (fcntl(sd, F_SETFL, O_NONBLOCK) != 0) {
-        perror("fcntl");
-        return false;
-    }
-    const int ttl_val = 64;
-    if (setsockopt(sd, SOL_IP, IP_TTL, &ttl_val, sizeof(ttl_val)) != 0) {
-        perror("setsockopt");
-        return false;
+    /*checking for error*/
+    if ( fd < 0 ) {
+        perror( "inotify_init" );
     }
 
-//    int cnt = 1;
-    for (int loop = 0; loop < 10; loop++) {
-        int len = sizeof(r_addr);
-        printf("before recvfrom\n");
-        struct packet pckt;
-        if (recvfrom(sd, &pckt, sizeof(pckt), 0, (struct sockaddr *) &r_addr, &len) > 0) {
-            return true;
+    /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
+    wd = inotify_add_watch( fd, "/tmp", IN_CREATE | IN_DELETE );
+
+    /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
+
+    length = read( fd, buffer, EVENT_BUF_LEN );
+
+    /*checking for error*/
+    if ( length < 0 ) {
+        perror( "read" );
+    }
+
+    /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
+    while ( i < length ) {     struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];     if ( event->len ) {
+            if ( event->mask & IN_CREATE ) {
+                if ( event->mask & IN_ISDIR ) {
+                    printf( "New directory %s created.\n", event->name );
+                }
+                else {
+                    printf( "New file %s created.\n", event->name );
+                }
+            }
+            else if ( event->mask & IN_DELETE ) {
+                if ( event->mask & IN_ISDIR ) {
+                    printf( "Directory %s deleted.\n", event->name );
+                }
+                else {
+                    printf( "File %s deleted.\n", event->name );
+                }
+            }
         }
-        printf("after recvfrom\n");
-
-        bzero(&pckt, sizeof(pckt));
-        pckt.hdr.type = ICMP_ECHO;
-//        int i = 0;
-        for (int i = 0; i < sizeof(pckt.msg) - 1; i++)
-            pckt.msg[i] = i + '0';
-//        pckt.msg[i] = 0;
-//        pckt.hdr.un.echo.sequence = cnt++;
-        pckt.hdr.checksum = checksum(&pckt, sizeof(pckt));
-        if (sendto(sd, &pckt, sizeof(pckt), 0, (struct sockaddr *) addr, sizeof(*addr)) <= 0)
-            perror("sendto");
-        usleep(300 * 1000);
+        i += EVENT_SIZE + event->len;
     }
-    return false;
-}
+    /*removing the “/tmp” directory from the watch list.*/
+    inotify_rm_watch( fd, wd );
 
-int main(int argc, char *argv[]) {
-    if (ping("www.baidu.com") == true) {
-        printf("Ping is OK. \n");
-    } else {
-        printf("Ping is not OK. \n");
-    }
-    return 0;
+    /*closing the INOTIFY instance*/
+    close( fd );
+
 }

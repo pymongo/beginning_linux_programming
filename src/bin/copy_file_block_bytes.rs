@@ -1,14 +1,8 @@
-use beginning_linux_programming::not_minus_1;
+//! `chapter03/copy_block.c`
+use beginning_linux_programming::syscall;
 
-fn main() {
-    unsafe {
-        main_();
-    }
-}
-
-/// `chapter03/copy_block.c`
 #[allow(clippy::cast_sign_loss)]
-unsafe fn main_() {
+fn main() {
     const BLOCK_SIZE: usize = 1024;
     let target_debug_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("target")
@@ -29,8 +23,8 @@ unsafe fn main_() {
     )
     .unwrap();
 
-    let read_fd = not_minus_1!(libc::open(read_path.as_ptr().cast(), libc::O_RDONLY));
-    let write_fd = not_minus_1!(libc::open(
+    let read_fd = syscall!(open(read_path.as_ptr().cast(), libc::O_RDONLY));
+    let write_fd = syscall!(open(
         write_path.as_ptr(),
         libc::O_WRONLY | libc::O_CREAT | libc::O_TRUNC,
         libc::S_IRUSR | libc::S_IWUSR,
@@ -38,11 +32,11 @@ unsafe fn main_() {
 
     let mut buf = [0_u8; BLOCK_SIZE];
     loop {
-        let nread = libc::read(read_fd, buf.as_mut_ptr().cast(), BLOCK_SIZE);
+        let nread = syscall!(read(read_fd, buf.as_mut_ptr().cast(), BLOCK_SIZE));
         if nread <= 0 {
             break;
         }
-        let nwrite = libc::write(write_fd, buf.as_mut_ptr().cast(), nread as usize);
+        let nwrite = syscall!(write(write_fd, buf.as_mut_ptr().cast(), nread as usize));
         assert_eq!(nread, nwrite);
     }
 }

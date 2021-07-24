@@ -24,7 +24,6 @@ unsafe fn server() {
 
     // 1. socket
     let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
-    assert_ne!(server_socket_fd, -1);
 
     // 2. bind
     let server_addr = super::server_default_sockaddr_in();
@@ -41,14 +40,11 @@ unsafe fn server() {
     loop {
         let mut client_addr: sockaddr_in = std::mem::zeroed();
         let mut peer_addr_len = std::mem::size_of_val(&client_addr) as socklen_t;
-        let client_socket_fd = libc::accept(
+        let client_socket_fd = crate::syscall!(accept(
             server_socket_fd,
             (&mut client_addr as *mut sockaddr_in).cast(),
             &mut peer_addr_len,
-        );
-        if client_socket_fd == -1 {
-            panic!("{}", std::io::Error::last_os_error());
-        }
+        ));
         // libc::printf(
         //     "client_addr=%s:%d\n\0".as_ptr().cast(),
         //     crate::inet_ntoa(client_addr.sin_addr),

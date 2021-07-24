@@ -196,7 +196,7 @@ GenFuture 没有实现 Unpin，所以自引用是安全的，也就是 Pin 智�
 
 Pin 到栈上的指针会跟随函数调用栈帧变化而变化，不如堆上的稳定，所以 !Unpin 在栈上指针需要 Unsafe
 */
-use crate::not_minus_1;
+use crate::syscall;
 use std::os::unix::prelude::{AsRawFd, RawFd};
 
 struct MyTcpListener(std::net::TcpListener);
@@ -304,7 +304,7 @@ struct Reactor {
 impl Default for Reactor {
     fn default() -> Self {
         Self {
-            epoll_fd: not_minus_1!(libc::epoll_create1(0)),
+            epoll_fd: syscall!(epoll_create1(0)),
             wakers: std::sync::Mutex::new(std::collections::HashMap::new()),
         }
     }
@@ -312,7 +312,7 @@ impl Default for Reactor {
 
 impl Drop for Reactor {
     fn drop(&mut self) {
-        not_minus_1!(libc::close(self.epoll_fd));
+        syscall!(close(self.epoll_fd));
     }
 }
 
@@ -337,7 +337,7 @@ impl Reactor {
     }
 
     fn add_event(&self, fd: RawFd, event_type: libc::c_int, waker: std::task::Waker) {
-        not_minus_1!(libc::epoll_ctl(
+        syscall!(epoll_ctl(
             self.epoll_fd,
             libc::EPOLL_CTL_ADD,
             fd,
@@ -351,7 +351,7 @@ fn reactor_main_loop() {
     let mut events = [unsafe { std::mem::zeroed() }; libc::FD_SETSIZE];
     loop {
         // epoll_wait's timeout arg -1 means to block indefinitely(no timeout)
-        let events_len = not_minus_1!(libc::epoll_wait(
+        let events_len = syscall!(epoll_wait(
             REACTOR.epoll_fd,
             events.as_mut_ptr(),
             libc::FD_SETSIZE as i32,
@@ -363,7 +363,7 @@ fn reactor_main_loop() {
                 // wake a accept_future task continue poll
                 waker.wake();
                 // remove epoll event, 让 Future 协程下一次 poll 失败时重新插入 accept event
-                not_minus_1!(libc::epoll_ctl(
+                syscall!(epoll_ctl(
                     REACTOR.epoll_fd,
                     libc::EPOLL_CTL_DEL,
                     fd,

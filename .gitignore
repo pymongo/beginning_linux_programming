@@ -3,3 +3,4 @@ Cargo.lock
 a.out
 cmake-build-debug
 .idea
+src/process_and_signal/config_file.toml

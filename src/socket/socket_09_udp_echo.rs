@@ -82,14 +82,11 @@ pub unsafe fn udp_echo_client() {
 
     // 2. connect
     let mut server_addr = super::server_default_sockaddr_in();
-    let connect_res = libc::connect(
+    crate::syscall!(connect(
         socket_fd,
         (&server_addr as *const sockaddr_in).cast(),
         std::mem::size_of_val(&server_addr) as socklen_t,
-    );
-    if connect_res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    ));
 
     let mut buf = *b"asdf";
     let n_write = libc::sendto(

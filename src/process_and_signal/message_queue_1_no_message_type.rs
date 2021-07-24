@@ -34,30 +34,23 @@ unsafe fn run(is_receiver: bool) {
     if is_receiver {
         let mut recv_data: RequestMessage = std::mem::zeroed();
         // copy data from mq to recv_data
-        let res = libc::msgrcv(
+        crate::syscall!(msgrcv(
             msqid,
             (&mut recv_data as *mut RequestMessage).cast::<libc::c_void>(),
             msg_size,
             0,
             0,
-        );
-        if res == -1 {
-            libc::perror(std::ptr::null_mut());
-            libc::exit(libc::EXIT_FAILURE);
-        }
+        ));
         dbg!(recv_data);
     } else {
         let req_msg = RequestMessage::SignUp;
         // copy data to mq from req_msg
-        let res = libc::msgsnd(
+        crate::syscall!(msgsnd(
             msqid,
             (&req_msg as *const RequestMessage).cast::<libc::c_void>(),
             msg_size,
             0,
-        );
-        if res == -1 {
-            libc::perror(std::ptr::null_mut());
-        }
+        ));
     }
 
     libc::msgctl(msqid, libc::IPC_RMID, std::ptr::null_mut());

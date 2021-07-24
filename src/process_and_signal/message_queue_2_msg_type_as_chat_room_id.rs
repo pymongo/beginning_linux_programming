@@ -1,3 +1,4 @@
+use crate::syscall;
 #[link(name = "c")]
 extern "C" {
     /// same as `asctime(localtime(time_t))`
@@ -39,10 +40,7 @@ struct Message {
 unsafe fn print_mq_status(msqid: i32) {
     // IPC_SET 命令是修改 MQ 的 msqid_ds 状态结构体
     let mut msqid_ds = std::mem::zeroed();
-    let res = libc::msgctl(msqid, libc::IPC_STAT, &mut msqid_ds);
-    if res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    syscall!(msgctl(msqid, libc::IPC_STAT, &mut msqid_ds));
     libc::printf(
         "msqid_ds.msg_rtime(receive time) = %s\0".as_ptr().cast(),
         ctime(&msqid_ds.msg_rtime),
@@ -83,7 +81,7 @@ unsafe fn run(is_receiver: bool) {
         其实不是过滤，只是优先度低的还在队列中，前面高优先级的都跳过
         msgtype=2 表示找到消息队列中第一条优先级等于 2 的消息并消费掉
         */
-        let res = libc::msgrcv(
+        syscall!(msgrcv(
             msqid,
             (&mut recv_data as *mut Message).cast::<libc::c_void>(),
             msg_size,
@@ -94,12 +92,7 @@ unsafe fn run(is_receiver: bool) {
             // 发送端默认当队列满时候 suspend 发送进程
             // 接收端默认当队列空时候 suspend 接收进程
             0,
-        );
-        if res == -1 {
-            // libc::perror(std::ptr::null_mut());
-            // libc::exit(libc::EXIT_FAILURE);
-            panic!("{}", std::io::Error::last_os_error());
-        }
+        ));
         dbg!(recv_data);
         // receiver 进程没有读取 MQ 状态的权限? EINVAL?
         print_mq_status(msqid); // msgtcl panic
@@ -110,15 +103,12 @@ unsafe fn run(is_receiver: bool) {
                 request: Request::Join,
             };
             // POSIX's mq: libc::mq_send()
-            let res = libc::msgsnd(
+            syscall!(msgsnd(
                 msqid,
                 (&req_msg as *const Message).cast::<libc::c_void>(),
                 msg_size,
                 0,
-            );
-            if res == -1 {
-                panic!("{}", std::io::Error::last_os_error());
-            }
+            ));
             print_mq_status(msqid);
         }
     }

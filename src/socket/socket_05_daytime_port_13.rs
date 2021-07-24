@@ -26,15 +26,11 @@ unsafe fn main_() {
         // Pad to size of `struct sockaddr`
         sin_zero: [0; 8],
     };
-    let res = libc::connect(
+    crate::syscall!(connect(
         socket_fd,
         (&server_addr as *const libc::sockaddr_in).cast(),
         crate::SOCKADDR_IN_LEN,
-    );
-    if res == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
-    dbg!(res);
+    ));
 
     let mut read_buf = [0_u8; 64];
     let n_read = libc::read(socket_fd, read_buf.as_mut_ptr().cast(), 64);

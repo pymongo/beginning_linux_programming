@@ -1,72 +1,128 @@
-use crate::{not_minus_1, SOCKADDR_IN_LEN};
+use crate::{gethostbyname, inet_ntoa, syscall, SOCKADDR_IN_LEN};
 
-unsafe fn nslookup(hostname: &str) -> libc::sockaddr_in {
+#[allow(clippy::ptr_as_ptr, clippy::cast_ptr_alignment)]
+fn nslookup(hostname: &str) -> libc::sockaddr_in {
     let hostname = std::ffi::CString::new(hostname).unwrap();
     let hostname = hostname.as_ptr().cast();
-    let hostent = crate::gethostbyname(hostname);
+    let hostent = unsafe { gethostbyname(hostname) };
     if hostent.is_null() {
         panic!("Invalid hostname or DNS lookup lookup failed");
     }
-    let hostent = *hostent;
-    #[allow(clippy::ptr_as_ptr, clippy::cast_ptr_alignment)]
-    let remote_addr = *(*hostent.h_addr_list as *mut libc::in_addr);
-    // PING baidu.com (39.156.69.79) 56(84) bytes of data.
-    libc::printf(
-        "PING %s (%s) 16 bytes of data\n\0".as_ptr().cast(),
+    let hostent = unsafe { *hostent };
+    let remote_addr = unsafe { *(*hostent.h_addr_list as *mut libc::in_addr) };
+    syscall!(printf(
+        "PING %s (%s) 64 bytes of data\n\0".as_ptr().cast(),
         hostname,
-        crate::inet_ntoa(remote_addr),
-    );
+        inet_ntoa(remote_addr),
+    ));
     libc::sockaddr_in {
         sin_family: libc::AF_INET as libc::sa_family_t,
         sin_port: 0,
         sin_addr: remote_addr,
-        sin_zero: std::mem::zeroed(),
+        sin_zero: unsafe { std::mem::zeroed() },
     }
 }
 
+/// icmphdr.type usually use ICMP_ECHO
+const ICMP_ECHO: u8 = 8;
+
+#[derive(Clone)]
 #[repr(C)]
 struct icmphdr {
     type_: u8,
     code: u8,
     checksum: u16,
-    _union_padding: u32,
+    un: un,
 }
 
-const ICMP_ECHO: u8 = 8;
+#[derive(Clone, Copy)]
+#[repr(C)]
+union un {
+    echo: echo,
+    gateway: u32,
+    frag: frag,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+struct echo {
+    id: u16,
+    sequence: u16,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+struct frag {
+    __glibc_reserved: u16,
+    mtu: u16,
+}
+
+#[derive(Clone)]
+#[repr(C)]
+struct Packet {
+    hdr: icmphdr,
+    msg: [u8; PACKET_LEN - std::mem::size_of::<icmphdr>()],
+}
+
+const PACKET_LEN: usize = 64;
 
 #[test]
 fn main() {
-    unsafe {
-        let remote_addr = nslookup("baidu.com");
-        let sockfd = libc::socket(libc::AF_INET, libc::SOCK_RAW, libc::IPPROTO_ICMP);
-        if sockfd == -1 {
-            panic!("SOCK_RAW need **sudo** permission");
-        }
+    let remote_addr = nslookup("baidu.com");
 
-        let mut ping_package = icmphdr {
-            type_: ICMP_ECHO,
-            ..std::mem::zeroed()
+    // SOCK_RAW need sudo/root permission
+    // let sockfd = libc::socket(libc::AF_INET, libc::SOCK_RAW, (*libc::getprotobyname("ICMP\0".as_ptr().cast())).p_proto);
+    let sockfd = syscall!(socket(libc::AF_INET, libc::SOCK_DGRAM, libc::IPPROTO_ICMP));
+    syscall!(fcntl(sockfd, libc::F_SETFL, libc::O_NONBLOCK));
+    syscall!(setsockopt(
+        sockfd,
+        libc::SOL_IP,
+        libc::IP_TTL,
+        (&64 as *const i32).cast(),
+        std::mem::size_of::<i32>() as u32
+    ));
+
+    for _ in 0..10 {
+        let mut packet: Packet = unsafe { std::mem::zeroed() };
+        let mut addr = remote_addr;
+        let mut addrlen = SOCKADDR_IN_LEN;
+        println!("before recv");
+        let recvfrom_ret = unsafe {
+            libc::recvfrom(
+                sockfd,
+                (&mut packet as *mut Packet).cast(),
+                PACKET_LEN,
+                0,
+                (&mut addr as *mut libc::sockaddr_in).cast(),
+                &mut addrlen,
+            )
         };
+        if recvfrom_ret > 0 {
+            println!("ping success");
+            std::process::exit(libc::EXIT_SUCCESS);
+        }
+        println!("after recv");
 
-        // ping without ttl(Time To Live) and timeout
-        not_minus_1!(libc::sendto(
+        packet = unsafe { std::mem::zeroed() };
+        packet.hdr.type_ = ICMP_ECHO;
+        for i in 0..packet.msg.len() - 1 {
+            packet.msg[i] = i as u8 + b'0';
+        }
+        println!("{:?}", packet.msg);
+        // 先写死，在 linux_command_rewritten_in_rust 的 repo 去实现 pnet::util::checksum 算法
+        packet.hdr.checksum = 3772;
+        // packet.hdr.checksum = pnet::util::checksum(&packet.msg, 0);
+
+        syscall!(sendto(
             sockfd,
-            (&ping_package as *const icmphdr).cast(),
-            std::mem::size_of::<icmphdr>(),
+            (&packet as *const Packet).cast(),
+            PACKET_LEN,
             0,
             (&remote_addr as *const libc::sockaddr_in).cast::<libc::sockaddr>(),
             SOCKADDR_IN_LEN,
         ));
 
-        let mut addr: libc::sockaddr_in = std::mem::zeroed();
-        let mut addrlen = SOCKADDR_IN_LEN;
-        not_minus_1!(libc::recvfrom(
-            sockfd,
-            (&mut ping_package as *mut icmphdr).cast(),
-            std::mem::size_of::<icmphdr>(),
-            0,
-            (&mut addr as *mut libc::sockaddr_in).cast::<libc::sockaddr>(),
-            &mut addrlen,
-        ));
+        syscall!(usleep(300 * 1000));
     }
+    eprintln!("ping failed!");
 }
