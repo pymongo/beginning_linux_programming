@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project(gtk C)
+project(gtk C CXX)
 set(CMAKE_C_STANDARD 11)
 
 find_package(PkgConfig REQUIRED)
@@ -10,7 +10,7 @@ else()
     message("gtk_found = ${GTK3_FOUND}")
 endif()
 include_directories(${GTK3_INCLUDE_DIRS})
-#add_definitions(${GTK3_CFLAGS_OTHER})
+#include_directories(/usr/include/qt) # bad example
 
 # gcc gtk1.c `pkgconf --cflags --libs gtk4`
 # or
@@ -39,5 +39,6 @@ target_link_libraries(gtk_07 ${GTK3_LIBRARIES})
 add_executable(gtk_08 gtk_08_message_dialog.c)
 target_link_libraries(gtk_08 ${GTK3_LIBRARIES})
 
-add_executable(gtk_temp gtk_temp.c)
-target_link_libraries(gtk_temp ${GTK3_LIBRARIES})
+# bad example
+#add_executable(temp temp.cpp)
+#target_link_libraries(temp qt)
