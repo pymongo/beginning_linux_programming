@@ -23,45 +23,15 @@ fn nslookup(hostname: &str) -> libc::sockaddr_in {
     }
 }
 
-/// icmphdr.type usually use ICMP_ECHO
 const ICMP_ECHO: u8 = 8;
 
-#[derive(Clone)]
 #[repr(C)]
-struct icmphdr {
+struct Packet {
     type_: u8,
     code: u8,
     checksum: u16,
-    un: un,
-}
-
-#[derive(Clone, Copy)]
-#[repr(C)]
-union un {
-    echo: echo,
-    gateway: u32,
-    frag: frag,
-}
-
-#[derive(Clone, Copy)]
-#[repr(C)]
-struct echo {
-    id: u16,
-    sequence: u16,
-}
-
-#[derive(Clone, Copy)]
-#[repr(C)]
-struct frag {
-    __glibc_reserved: u16,
-    mtu: u16,
-}
-
-#[derive(Clone)]
-#[repr(C)]
-struct Packet {
-    hdr: icmphdr,
-    msg: [u8; PACKET_LEN - std::mem::size_of::<icmphdr>()],
+    union_padding: u32,
+    msg: [u8; PACKET_LEN - 8],
 }
 
 const PACKET_LEN: usize = 64;
@@ -104,13 +74,17 @@ fn main() {
         println!("after recv");
 
         packet = unsafe { std::mem::zeroed() };
-        packet.hdr.type_ = ICMP_ECHO;
+        packet.type_ = ICMP_ECHO;
         for i in 0..packet.msg.len() - 1 {
             packet.msg[i] = i as u8 + b'0';
         }
-        println!("{:?}", packet.msg);
+        println!("packet.msg.len() = {}", packet.msg.len());
+        println!("packet.msg = {:?}", packet.msg);
         // 先写死，在 linux_command_rewritten_in_rust 的 repo 去实现 pnet::util::checksum 算法
-        packet.hdr.checksum = 3772;
+
+        // packet.checksum = 3772;
+        packet.checksum = 62527; // 用 3772 或 62527 都行
+
         // packet.hdr.checksum = pnet::util::checksum(&packet.msg, 0);
 
         syscall!(sendto(

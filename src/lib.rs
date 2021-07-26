@@ -25,6 +25,9 @@ mod socket;
 #[cfg(test)]
 mod terminal;
 
+// #include <linux/limits.h>
+pub const NAME_MAX: usize = 256;
+
 /**
 ```text
 MariaDB [test]> select inet_aton("192.168.1.1");
@@ -33,8 +36,6 @@ MariaDB [test]> select inet_aton("192.168.1.1");
 +--------------------------+
 |               3232235777 |
 +--------------------------+
-1 row in set (0.000 sec)
-
 MariaDB [test]> select inet_ntoa(3232235777);
 ```
 */
@@ -77,8 +78,6 @@ fn test_inet_aton() {
 }
 
 pub fn print_filename_from_fd(fd: i32) {
-    // linux/limits.h
-    const NAME_MAX: usize = 255;
     // /proc/self is symbolic link to /proc/$PID
     // /proc/self/fd/$FD 一般都是一个软链接，如果是 socket/pipe 则会长这个样子: socket:[3428314]
     let fd_path = format!("/proc/self/fd/{}\0", fd);

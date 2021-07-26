@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *username_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     GtkWidget *password_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     GtkWidget* password_entry = gtk_entry_new();
-    gtk_entry_set_visibility(GTK_ENTRY (password_entry), FALSE);
+    gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE);
     gtk_box_set_homogeneous(GTK_BOX(username_row), TRUE);
     gtk_box_set_homogeneous(GTK_BOX(password_row), TRUE);
     GtkWidget* ok_button = gtk_button_new_with_label("Ok");
