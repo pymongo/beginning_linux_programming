@@ -20,8 +20,9 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(window), button);
     g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_callback), "user input data send to button");
 
-    gtk_widget_show(window);
-    gtk_widget_show(button);
+    gtk_widget_show_all(window);
+//    gtk_widget_show(window);
+//    gtk_widget_show(button);
     gtk_main();
     return 0;
 }

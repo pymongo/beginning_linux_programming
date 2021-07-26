@@ -36,5 +36,8 @@ target_link_libraries(gtk_06 ${GTK3_LIBRARIES})
 add_executable(gtk_07 gtk_07_tree_view.c)
 target_link_libraries(gtk_07 ${GTK3_LIBRARIES})
 
+add_executable(gtk_08 gtk_08_message_dialog.c)
+target_link_libraries(gtk_08 ${GTK3_LIBRARIES})
+
 add_executable(gtk_temp gtk_temp.c)
 target_link_libraries(gtk_temp ${GTK3_LIBRARIES})
