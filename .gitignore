@@ -1,6 +1,15 @@
 target/
 Cargo.lock
-a.out
-cmake-build-debug
+
+## idea
 .idea
+cmake-build-debug
+
+## Qt and C/C++ build files
+a.out
+build*
+*.pro.user
+.qmake.stash
+
+## custom config file
 src/process_and_signal/config_file.toml
