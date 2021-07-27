@@ -27,10 +27,7 @@ unsafe fn main_() {
             break;
         }
         let in_addr = *in_addr_ptr;
-        libc::printf(
-            "alias = %s\n\0".as_ptr().cast(),
-            inet_ntoa(in_addr),
-        );
+        libc::printf("alias = %s\n\0".as_ptr().cast(), inet_ntoa(in_addr));
         alias = alias.add(1);
     }
 }
