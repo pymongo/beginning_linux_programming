@@ -6,9 +6,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    qDebug() << "MainWindow" << this << "at position" << this->pos();
-    this->setWindowTitle("My window title");
-    auto button = new QPushButton(this);
+    setWindowTitle("My window title");
+    auto button = new QPushButton("button_label", this);
     connect(button, SIGNAL(clicked()), this, SLOT(my_clicked()));
 }
 
