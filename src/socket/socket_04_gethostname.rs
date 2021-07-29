@@ -1,5 +1,5 @@
 //! ch16/getname.c
-use crate::{inet_ntoa, NAME_MAX};
+use crate::{htonl, inet_ntoa, NAME_MAX};
 
 #[test]
 fn main() {
@@ -8,7 +8,6 @@ fn main() {
     }
 }
 
-#[allow(clippy::cast_ptr_alignment)]
 unsafe fn main_() {
     let mut hostname_buf = [0_u8; NAME_MAX];
     libc::gethostname(hostname_buf.as_mut_ptr().cast(), NAME_MAX);
@@ -22,11 +21,13 @@ unsafe fn main_() {
     // h_aliases field is list of aliases (nicknames)
     let mut alias = hostinfo.h_addr_list; // list of address (network order)
     while !alias.is_null() {
-        let in_addr_ptr = (*alias).cast::<libc::in_addr>();
+        let in_addr_ptr = (*alias).cast::<[u8; 4]>();
         if in_addr_ptr.is_null() {
             break;
         }
-        let in_addr = *in_addr_ptr;
+        let in_addr = libc::in_addr {
+            s_addr: { htonl(u32::from_be_bytes(*in_addr_ptr)) },
+        };
         libc::printf("alias = %s\n\0".as_ptr().cast(), inet_ntoa(in_addr));
         alias = alias.add(1);
     }

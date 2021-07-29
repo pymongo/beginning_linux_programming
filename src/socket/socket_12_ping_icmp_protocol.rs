@@ -1,7 +1,6 @@
-use crate::{gethostbyname, inet_ntoa, syscall, SOCKADDR_IN_LEN};
+use crate::{gethostbyname, htonl, inet_ntoa, syscall, SOCKADDR_IN_LEN};
 
-#[allow(clippy::ptr_as_ptr, clippy::cast_ptr_alignment)]
-fn nslookup(hostname: &str) -> libc::sockaddr_in {
+fn dns_resolve(hostname: &str) -> libc::sockaddr_in {
     let hostname = std::ffi::CString::new(hostname).unwrap();
     let hostname = hostname.as_ptr().cast();
     let hostent = unsafe { gethostbyname(hostname) };
@@ -9,7 +8,12 @@ fn nslookup(hostname: &str) -> libc::sockaddr_in {
         panic!("Invalid hostname or DNS lookup lookup failed");
     }
     let hostent = unsafe { *hostent };
-    let remote_addr = unsafe { *(*hostent.h_addr_list as *mut libc::in_addr) };
+    let remote_addr = unsafe { *(*hostent.h_addr_list).cast::<[u8; 4]>() };
+    println!("{:?}", remote_addr);
+    let remote_addr = libc::in_addr {
+        // 处理器是小端序，网络传输是大端序号，还是转换一下
+        s_addr: unsafe { htonl(u32::from_be_bytes(remote_addr)) },
+    };
     syscall!(printf(
         "PING %s (%s) 64 bytes of data\n\0".as_ptr().cast(),
         hostname,
@@ -38,7 +42,7 @@ const PACKET_LEN: usize = 64;
 
 #[test]
 fn main() {
-    let remote_addr = nslookup("baidu.com");
+    let remote_addr = dns_resolve("www.baidu.com");
 
     // SOCK_RAW need sudo/root permission
     // let sockfd = libc::socket(libc::AF_INET, libc::SOCK_RAW, (*libc::getprotobyname("ICMP\0".as_ptr().cast())).p_proto);

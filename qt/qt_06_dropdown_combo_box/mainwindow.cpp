@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     auto vbox = new QVBoxLayout(root_widget);
 
     auto editable_combo = new QComboBox(root_widget);
-    // user can input to search item in dropdown
+    // setEditable(true): user can input to search item in dropdown
     editable_combo->setEditable(true);
     vbox->addWidget(editable_combo);
     auto read_only_combo = new QComboBox(root_widget);
