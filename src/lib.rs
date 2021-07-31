@@ -28,26 +28,13 @@ mod terminal;
 // #include <linux/limits.h>
 pub const NAME_MAX: usize = 256;
 
-/**
-```text
-MariaDB [test]> select inet_aton("192.168.1.1");
-+--------------------------+
-| inet_aton("192.168.1.1") |
-+--------------------------+
-|               3232235777 |
-+--------------------------+
-MariaDB [test]> select inet_ntoa(3232235777);
-```
-*/
 #[link(name = "c")]
 extern "C" {
     /// type in_addr is a field of libc::socketadd_in, which used in bind/connect
     /// function naming is similar to atoi(string to int)
     /// aton: means string to network_ip
     /// ntoa: means network_ip to string
-    /// int inet_aton (const char *cp, struct in_addr *__inp)
     pub fn inet_aton(cp: *const c_char, inp: *mut in_addr) -> c_int;
-    /// char *inet_ntoa(struct in_addr in);
     pub fn inet_ntoa(in_: in_addr) -> *mut c_char;
     // inet_addr 是 inet_aton 完全不考虑字符串解析错误的版本
     // fn inet_addr(cp: *const c_char) -> in_addr_t

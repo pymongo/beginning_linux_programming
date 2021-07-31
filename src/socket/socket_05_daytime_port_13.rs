@@ -1,30 +1,24 @@
-//! ch16/getdate.c
-#[test] // FIXME port 13 daytime service is not running on manjaro
+#[test]
 fn main() {
     unsafe {
         main_();
     }
 }
 
-/**
-```text
-[w@ww ~]$ cat /etc/services | grep daytime
-daytime            13/tcp
-daytime            13/udp
-```
-*/
 unsafe fn main_() {
-    let servinfo = *libc::getservbyname("daytime\0".as_ptr().cast(), "tcp\0".as_ptr().cast());
-    dbg!(servinfo.s_port);
-    dbg!(crate::htons(servinfo.s_port as u16));
+    // sudo systemctl start telnet.socket
+    let servinfo = *libc::getservbyname("telnet\0".as_ptr().cast(), "tcp\0".as_ptr().cast());
+    let port = crate::htons(servinfo.s_port as u16);
+    dbg!(port);
 
-    let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
+    let socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, libc::IPPROTO_TCP);
     let server_addr = libc::sockaddr_in {
         sin_family: libc::AF_INET as libc::sa_family_t,
-        sin_port: crate::htons(servinfo.s_port as u16),
-        sin_addr: libc::in_addr { s_addr: 0 },
-        // Pad to size of `struct sockaddr`
-        sin_zero: [0; 8],
+        sin_port: port,
+        sin_addr: libc::in_addr {
+            s_addr: u32::from_be_bytes([127, 0, 0, 1]),
+        },
+        ..std::mem::zeroed()
     };
     crate::syscall!(connect(
         socket_fd,
@@ -32,8 +26,8 @@ unsafe fn main_() {
         crate::SOCKADDR_IN_LEN,
     ));
 
-    let mut read_buf = [0_u8; 64];
-    let n_read = libc::read(socket_fd, read_buf.as_mut_ptr().cast(), 64);
+    let mut read_buf = [0_u8; 128];
+    let n_read = libc::read(socket_fd, read_buf.as_mut_ptr().cast(), read_buf.len());
     dbg!(n_read);
     libc::printf(
         "%s\0".as_ptr().cast(),

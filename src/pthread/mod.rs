@@ -8,3 +8,7 @@ mod pthread_6_get_priority;
 mod pthread_7_cancel;
 mod pthread_8_pass_arg_by_value;
 mod pthread_9_cond_wait;
+mod std_sync_barrier;
+mod std_thread_park;
+mod thread_local;
+//mod std_thread_yield_now;

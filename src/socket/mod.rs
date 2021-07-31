@@ -1,6 +1,6 @@
 mod socket_01_local_socket_file;
 mod socket_02_tcp_echo;
-mod socket_03_htonl;
+mod socket_03_get_host_byte_order;
 mod socket_04_gethostname;
 mod socket_05_daytime_port_13;
 mod socket_06_fork_multi_clients;
