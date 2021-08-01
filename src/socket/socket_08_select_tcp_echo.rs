@@ -30,7 +30,14 @@ fn tcp_echo_select_server() {
     ));
 
     // 3. listen, create a queue to store pending requests
-    syscall!(listen(server_socket_fd, 5));
+    let tcp_max_syn_backlog = std::fs::read_to_string("/proc/sys/net/ipv4/tcp_max_syn_backlog")
+        .unwrap()
+        .parse::<u16>()
+        .unwrap();
+    syscall!(listen(
+        server_socket_fd,
+        libc::c_int::from(tcp_max_syn_backlog)
+    ));
 
     let mut read_fds: libc::fd_set = unsafe { std::mem::zeroed() };
     unsafe {

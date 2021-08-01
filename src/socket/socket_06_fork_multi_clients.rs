@@ -23,9 +23,10 @@ unsafe fn server() {
     libc::signal(libc::SIGCHLD, libc::SIG_IGN);
 
     // 1. socket
-    let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0);
+    // `SOCK_CLOEXEC`: close server_socket_fd on child process by fork
+    let server_socket_fd = libc::socket(libc::AF_INET, libc::SOCK_STREAM | libc::SOCK_CLOEXEC, 0);
 
-    // 2. bind
+    // 2. bind a name/addr to a socket
     let server_addr = super::server_default_sockaddr_in();
     libc::bind(
         server_socket_fd,

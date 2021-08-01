@@ -3,9 +3,7 @@ use crate::syscall;
 #[test]
 #[ignore = "must run both server and client"]
 fn main() {
-    unsafe {
-        server();
-    }
+    server();
 }
 
 #[test]
@@ -36,7 +34,7 @@ real-time non-blocking time  (microseconds, -R) unlimited
 open files                          (-n) 1024
 ```
 */
-unsafe fn server() {
+fn server() {
     /* 1. socket(): create a socket endpoint for communication
     fn socket(domain: i32, type: i32, protocol: i32) -> i32: create an endpoint for communication
     domain: AF_UNIX == AF_LOCK, local communication
@@ -47,15 +45,17 @@ unsafe fn server() {
 
     // 2. bind(): bind a name(file?) to a socket(fd)
     // AF_UNIX 的 地址最好用 sockaddr_un 的结构体，跟 AF_INET 用的 sockaddr_in 区分开
-    let mut server_addr: libc::sockaddr_un = std::mem::zeroed();
+    let mut server_addr: libc::sockaddr_un = unsafe { std::mem::zeroed() };
     server_addr.sun_family = libc::AF_UNIX as u16;
-    libc::strcpy(
-        server_addr.sun_path.as_mut_ptr(),
-        SERVER_SOCKET_FILENAME.as_ptr().cast(),
-    );
+    unsafe {
+        libc::strcpy(
+            server_addr.sun_path.as_mut_ptr(),
+            SERVER_SOCKET_FILENAME.as_ptr().cast(),
+        )
+    };
     // bind would create new socket_file from server_addr
     // if socket_file is exist, would get errno `Address already in use`
-    libc::unlink(SERVER_SOCKET_FILENAME.as_ptr().cast());
+    syscall!(unlink(SERVER_SOCKET_FILENAME.as_ptr().cast()));
     syscall!(bind(
         server_socket_fd,
         (&server_addr as *const libc::sockaddr_un).cast(),
@@ -64,10 +64,10 @@ unsafe fn server() {
 
     // 3. listen: open connection queue and wait for clients
     // backlog arg is max pending connections in queue(queue max size)
-    assert_eq!(libc::listen(server_socket_fd, 5), 0);
+    syscall!(listen(server_socket_fd, 5));
 
     // 4. accept
-    let mut client_addr: libc::sockaddr_un = std::mem::zeroed();
+    let mut client_addr: libc::sockaddr_un = unsafe { std::mem::zeroed() };
     let mut peer_addr_len = crate::SOCKADDR_IN_LEN;
     dbg!(peer_addr_len);
     let client_socket_fd = syscall!(accept(
@@ -78,21 +78,21 @@ unsafe fn server() {
     crate::print_filename_from_fd(client_socket_fd);
     dbg!(peer_addr_len);
     let mut buf = 0_u8;
-    libc::read(
+    syscall!(read(
         client_socket_fd,
         (&mut buf as *mut u8).cast(),
         std::mem::size_of::<u8>(),
-    );
+    ));
     println!("request = {}\nresponse = {}", buf, buf.to_ascii_uppercase());
     buf = buf.to_ascii_uppercase();
-    libc::write(
+    syscall!(write(
         client_socket_fd,
         (&buf as *const u8).cast(),
         std::mem::size_of::<u8>(),
-    );
-    libc::close(client_socket_fd);
+    ));
+    syscall!(close(client_socket_fd));
 
-    libc::close(server_socket_fd);
+    syscall!(close(server_socket_fd));
 }
 
 /** client(local socket file):

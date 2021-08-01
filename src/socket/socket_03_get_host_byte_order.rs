@@ -1,6 +1,3 @@
-use crate::inet_ntoa;
-use libc::{sockaddr_in, socklen_t};
-
 /**
 ```text
 | inet_aton("127.0.0.1") |

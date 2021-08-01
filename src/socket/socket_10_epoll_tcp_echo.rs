@@ -23,19 +23,13 @@ if you want to kill it (例如 fork的跑到一半，client关掉留下残留进
 - socket_06_fork_multi_clients: 4089 ms
 - socket_10_epoll_tcp_echo: 16031 ms
 */
-use crate::not_minus_1;
+use crate::syscall;
 use std::os::unix::prelude::RawFd;
 
 #[test]
 #[ignore = "must run both server and client"]
 fn run_non_blocking() {
-    reactor_main_loop(true);
-}
-
-#[test]
-#[ignore = "must run both server and client"]
-fn run_blocking() {
-    reactor_main_loop(false);
+    reactor_main_loop();
 }
 
 // struct Reactor {
@@ -105,7 +99,7 @@ impl Epoll {
 fn bind_listen_default_port() -> RawFd {
     let server_socket_fd = syscall!(socket(
         libc::AF_INET,
-        libc::SOCK_STREAM,
+        libc::SOCK_STREAM | libc::SOCK_NONBLOCK,
         libc::IPPROTO_IP
     ));
     let server_addr = super::server_default_sockaddr_in();
@@ -119,11 +113,6 @@ fn bind_listen_default_port() -> RawFd {
     syscall!(listen(server_socket_fd, 128));
     // set_nonblocking(server_socket_fd);
     server_socket_fd
-}
-
-fn set_nonblocking(fd: RawFd) {
-    let flags = syscall!(fcntl(fd, libc::F_GETFL, 0));
-    syscall!(fcntl(fd, libc::F_SETFL, libc::O_NONBLOCK | flags));
 }
 
 /// input_arg: server_fd, return client_socket_fd
@@ -148,13 +137,9 @@ fn accept(server_socket_fd: RawFd) -> RawFd {
     client_socket_fd
 }
 
-fn reactor_main_loop(is_non_blocking: bool) {
+fn reactor_main_loop() {
     let server_socket_fd = bind_listen_default_port();
-    if is_non_blocking {
-        // 只要 server_socket_fd 是 non-blocking 的 accept 也会变成 non-blocking
-        set_nonblocking(server_socket_fd);
-    }
-    dbg!(server_socket_fd, is_non_blocking);
+
     let epoll = Epoll::default();
     epoll.add_event(server_socket_fd, libc::EPOLLIN);
     // bad example: events' len is always zero, 要么固定 1024 长度，要么每次循环 events.clear() 设置成 epoll_wait 返回值的长度
@@ -173,9 +158,6 @@ fn reactor_main_loop(is_non_blocking: bool) {
         for event in events.iter().take(events_len as usize) {
             if event.u64 == server_socket_fd as u64 {
                 let client_socket_fd = accept(server_socket_fd);
-                if is_non_blocking {
-                    set_nonblocking(client_socket_fd);
-                }
                 epoll.add_event(client_socket_fd, libc::EPOLLIN);
                 continue;
             }

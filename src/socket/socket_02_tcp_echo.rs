@@ -21,10 +21,9 @@ fn run_client() {
 unsafe fn server() {
     // 1. socket
     let server_socket_fd = syscall!(socket(libc::AF_INET, libc::SOCK_STREAM, 0));
-    // set server_socket_fd to non-blocking IO
+    // set server_socket_fd to non-blocking IO or libc::SOCK_STREAM | libc::SOCK_NONBLOCK
     // let flags = libc::fcntl(server_socket_fd, libc::F_GETFL, 0);
     // libc::fcntl(server_socket_fd, libc::F_SETFL, libc::O_NONBLOCK | flags);
-
     // arg value == 1, means true
     // libc::SO_DEBUG 选项要 sudo 权限
     syscall!(setsockopt(
@@ -46,7 +45,15 @@ unsafe fn server() {
     );
 
     // 3. listen, create a queue to store pending requests
-    libc::listen(server_socket_fd, 1);
+    // get server max SYC_RECV backlog; max ESTABLISHED count is backlog+1
+    let tcp_max_syn_backlog = std::fs::read_to_string("/proc/sys/net/ipv4/tcp_max_syn_backlog")
+        .unwrap()
+        .parse::<u16>()
+        .unwrap();
+    syscall!(listen(
+        server_socket_fd,
+        libc::c_int::from(tcp_max_syn_backlog)
+    ));
 
     // 4. accept, return peer/client address, peer address family is same type as server bind+listen SocketAddr
     // if not pending:
@@ -80,9 +87,9 @@ unsafe fn server() {
         (&resp as *const u8).cast(),
         std::mem::size_of::<u8>(),
     );
-    libc::close(client_socket_fd);
+    syscall!(close(client_socket_fd));
 
-    libc::close(server_socket_fd);
+    syscall!(close(server_socket_fd));
 }
 
 pub unsafe fn client() {
@@ -105,12 +112,12 @@ pub unsafe fn client() {
         std::mem::size_of::<u8>(),
     );
     println!("reqeust = {}", buf);
-    libc::read(
+    syscall!(read(
         socket_fd,
         (&mut buf as *mut u8).cast(),
         std::mem::size_of::<u8>(),
-    );
+    ));
     println!("response = {}", buf);
 
-    libc::close(socket_fd);
+    syscall!(close(socket_fd));
 }
