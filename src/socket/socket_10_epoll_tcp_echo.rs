@@ -23,6 +23,7 @@ if you want to kill it (例如 fork的跑到一半，client关掉留下残留进
 - socket_06_fork_multi_clients: 4089 ms
 - socket_10_epoll_tcp_echo: 16031 ms
 */
+use super::{accept, bind_listen_default_port};
 use crate::syscall;
 use std::os::unix::prelude::RawFd;
 
@@ -95,50 +96,8 @@ impl Epoll {
     }
 }
 
-/// 完成 std::net::TcpListener::bind() 的操作，并返回 server 的 socket_fd
-fn bind_listen_default_port() -> RawFd {
-    let server_socket_fd = syscall!(socket(
-        libc::AF_INET,
-        libc::SOCK_STREAM | libc::SOCK_NONBLOCK,
-        libc::IPPROTO_IP
-    ));
-    let server_addr = super::server_default_sockaddr_in();
-    syscall!(bind(
-        server_socket_fd,
-        (&server_addr as *const libc::sockaddr_in).cast(),
-        crate::SOCKADDR_IN_LEN,
-    ));
-    // https://github.com/rust-lang/rust/blob/db492ecd5ba6bd82205612cebb9034710653f0c2/library/std/src/sys_common/net.rs#L386
-    // std::net::TcpListener default backlog is 128
-    syscall!(listen(server_socket_fd, 128));
-    // set_nonblocking(server_socket_fd);
-    server_socket_fd
-}
-
-/// input_arg: server_fd, return client_socket_fd
-/// TCP accept 之后得到 client_socket_fd 就可以通过 fd 进行全双工通信了
-fn accept(server_socket_fd: RawFd) -> RawFd {
-    let mut client_addr: libc::sockaddr_in = unsafe { std::mem::zeroed() };
-    // client_addr == peer_addr
-    let mut peer_addr_len = crate::SOCKADDR_IN_LEN;
-    let client_socket_fd = syscall!(accept(
-        server_socket_fd,
-        (&mut client_addr as *mut libc::sockaddr_in).cast(),
-        &mut peer_addr_len,
-    ));
-    // unsafe {
-    //     libc::printf(
-    //         "client_addr=%s:%d, client_socket_fd=%d\n\0".as_ptr().cast(),
-    //         crate::inet_ntoa(client_addr.sin_addr),
-    //         u32::from(client_addr.sin_port.to_be()),
-    //         client_socket_fd,
-    //     );
-    // }
-    client_socket_fd
-}
-
 fn reactor_main_loop() {
-    let server_socket_fd = bind_listen_default_port();
+    let server_socket_fd = bind_listen_default_port(true);
 
     let epoll = Epoll::default();
     epoll.add_event(server_socket_fd, libc::EPOLLIN);

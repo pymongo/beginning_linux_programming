@@ -57,7 +57,7 @@ unsafe fn tcp_echo_server() {
     //     libc::SOL_SOCKET,
     //     libc::SO_KEEPALIVE,
     //     (&1 as *const i32).cast::<libc::c_void>(),
-    //     4,
+    //     std::mem::size_of::<i32>(),
     // ));
 
     // 2. bind
