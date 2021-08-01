@@ -45,6 +45,7 @@ extern "C" {
     /// network byte order == MSB == bigger-endian
     pub fn htonl(hostlong: u32) -> u32;
     pub fn htons(hostshort: u16) -> u16;
+    pub fn ntohs(network_u16: u16) -> u16;
 }
 
 pub const SOCKADDR_IN_LEN: libc::socklen_t =

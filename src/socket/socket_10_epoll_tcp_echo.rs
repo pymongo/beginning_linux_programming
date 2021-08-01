@@ -130,7 +130,7 @@ fn accept(server_socket_fd: RawFd) -> RawFd {
     //     libc::printf(
     //         "client_addr=%s:%d, client_socket_fd=%d\n\0".as_ptr().cast(),
     //         crate::inet_ntoa(client_addr.sin_addr),
-    //         u32::from(client_addr.sin_port),
+    //         u32::from(client_addr.sin_port.to_be()),
     //         client_socket_fd,
     //     );
     // }

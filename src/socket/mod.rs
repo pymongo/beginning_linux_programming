@@ -28,3 +28,11 @@ pub fn server_default_sockaddr_in() -> libc::sockaddr_in {
         }
     }
 }
+
+#[test]
+fn test_server_default_sockaddr_in() {
+    for _ in 0..5 {
+        let addr = server_default_sockaddr_in();
+        dbg!(addr.sin_port.to_be());
+    }
+}

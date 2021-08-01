@@ -61,7 +61,7 @@ unsafe fn udp_echo_server() {
         libc::printf(
             "client_addr=%s:%d\n\0".as_ptr().cast(),
             inet_ntoa(client_addr.sin_addr),
-            libc::c_uint::from(client_addr.sin_port),
+            libc::c_uint::from(client_addr.sin_port.to_be()),
         );
         let n_write = libc::sendto(
             server_socket_fd,

@@ -12,7 +12,7 @@ fn main() {
 #[ignore = "must run server first"]
 fn run_client() {
     unsafe {
-        super::socket_02_tcp_echo::client();
+        super::socket_02_tcp_echo::tcp_echo_client();
     }
 }
 
@@ -46,11 +46,6 @@ unsafe fn server() {
             (&mut client_addr as *mut sockaddr_in).cast(),
             &mut peer_addr_len,
         ));
-        // libc::printf(
-        //     "client_addr=%s:%d\n\0".as_ptr().cast(),
-        //     crate::inet_ntoa(client_addr.sin_addr),
-        //     u32::from(client_addr.sin_port),
-        // );
 
         if libc::fork() == 0 {
             let mut req_buf = 0_u8;
@@ -61,7 +56,7 @@ unsafe fn server() {
                     std::mem::size_of::<u8>(),
                 );
                 if n_read == 0 {
-                    libc::close(client_socket_fd);
+                    libc::shutdown(client_socket_fd, libc::SHUT_RDWR);
                     break;
                 }
                 // println!("request = {}\nresponse = {}", req_buf, req_buf);

@@ -11,7 +11,7 @@ fn main() {
 #[ignore = "must run both server and client"]
 fn run_client() {
     unsafe {
-        super::socket_02_tcp_echo::client();
+        super::socket_02_tcp_echo::tcp_echo_client();
     }
 }
 
@@ -68,9 +68,9 @@ fn tcp_echo_select_server() {
                 ));
                 unsafe {
                     // libc::printf(
-                    //     "client_addr=%s:%d, client_socket_fd=%d\n\0".as_ptr().cast(),
+                    //     "client_addr = %s:%d, client_socket_fd=%d\n\0".as_ptr().cast(),
                     //     crate::inet_ntoa(client_addr.sin_addr),
-                    //     u32::from(client_addr.sin_port),
+                    //     u32::from(client_addr.sin_port.to_be()),
                     //     client_socket_fd,
                     // );
                     // add new client to read_fds, and in next `loop {`(not for loop) we can read client request
