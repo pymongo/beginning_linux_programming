@@ -44,6 +44,7 @@ localhost.http-alt > localhost.44636: Flags [.], ack 3, win 512, options [nop,no
 localhost.44636 > localhost.http-alt: Flags [.], ack 3, win 512, options [nop,nop,TS val 3066516298 ecr 3066516298], length 0
 ```
 */
+#[allow(clippy::ptr_as_ptr)]
 unsafe fn tcp_echo_server() {
     // 1. socket
     let server_socket_fd = syscall!(socket(libc::AF_INET, libc::SOCK_STREAM, 0));

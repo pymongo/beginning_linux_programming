@@ -6,6 +6,8 @@
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
     clippy::cast_sign_loss,
+    clippy::shadow_reuse,
+    clippy::shadow_unrelated,
     clippy::doc_markdown,
     clippy::missing_panics_doc,
     clippy::missing_safety_doc,

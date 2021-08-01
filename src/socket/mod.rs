@@ -11,7 +11,8 @@ mod socket_10_epoll_tcp_echo;
 mod socket_11_accept_async_reactor_wake_future;
 mod socket_12_ping_icmp_protocol;
 mod socket_13_http_writev_send_file;
-mod socket_14_sendfile;
+mod socket_14_sendfile_without_user_space_buf;
+mod socket_15_splice_without_user_space_buf_echo;
 
 use crate::{htons, syscall};
 use std::os::unix::prelude::RawFd;
@@ -32,7 +33,7 @@ impl Drop for MyTcpServer {
 }
 
 impl MyTcpServer {
-    pub fn new(is_non_blocking: bool) -> Self {
+    pub const fn new(is_non_blocking: bool) -> Self {
         Self {
             server_sockfd: -1,
             is_non_blocking,
