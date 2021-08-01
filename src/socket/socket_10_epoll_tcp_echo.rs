@@ -23,9 +23,10 @@ if you want to kill it (例如 fork的跑到一半，client关掉留下残留进
 - socket_06_fork_multi_clients: 4089 ms
 - socket_10_epoll_tcp_echo: 16031 ms
 */
-use super::{accept, bind_listen_default_port};
 use crate::syscall;
 use std::os::unix::prelude::RawFd;
+
+use super::MyTcpServer;
 
 #[test]
 #[ignore = "must run both server and client"]
@@ -97,10 +98,11 @@ impl Epoll {
 }
 
 fn reactor_main_loop() {
-    let server_socket_fd = bind_listen_default_port(true);
+    let mut server = MyTcpServer::new(true);
+    server.bind_listen();
 
     let epoll = Epoll::default();
-    epoll.add_event(server_socket_fd, libc::EPOLLIN);
+    epoll.add_event(server.server_sockfd, libc::EPOLLIN);
     // bad example: events' len is always zero, 要么固定 1024 长度，要么每次循环 events.clear() 设置成 epoll_wait 返回值的长度
     // let mut events = Vec::<libc::epoll_event>::with_capacity(libc::FD_SETSIZE);
     let mut events = [unsafe { std::mem::zeroed() }; libc::FD_SETSIZE];
@@ -115,9 +117,10 @@ fn reactor_main_loop() {
             -1
         ));
         for event in events.iter().take(events_len as usize) {
-            if event.u64 == server_socket_fd as u64 {
-                let client_socket_fd = accept(server_socket_fd);
-                epoll.add_event(client_socket_fd, libc::EPOLLIN);
+            if event.u64 == server.server_sockfd as u64 {
+                let conn = server.accept();
+                epoll.add_event(conn.client_sockfd, libc::EPOLLIN);
+                std::mem::forget(conn);
                 continue;
             }
 

@@ -1,10 +1,11 @@
-use super::{accept, bind_listen_default_port};
+use super::MyTcpServer;
 use crate::syscall;
 
 #[test]
 fn server() {
-    let server_sockfd = bind_listen_default_port(false);
-    let client_sockfd = accept(server_sockfd);
+    let mut server = MyTcpServer::new(false);
+    server.bind_listen();
+    let conn = server.accept();
 
     let file_name = format!("{}/Cargo.toml\0", env!("CARGO_MANIFEST_DIR"));
     let mut file_stat = unsafe { std::mem::zeroed() };
@@ -25,11 +26,9 @@ fn server() {
     iovecs[1].iov_base = resp_body.as_mut_ptr().cast();
     iovecs[1].iov_len = resp_body.len();
     // 当然 header 和 body 连在一起也可以，不过那样太耦合，而且我这示例主要为了演示 writev
-    unsafe {
-        libc::writev(client_sockfd, iovecs.as_ptr(), iovecs.len() as i32);
-    }
-
-    // 不用 shutdown 否则要等 2*MST 才能释放服务器端口资源
-    syscall!(close(client_sockfd));
-    syscall!(close(server_sockfd));
+    syscall!(writev(
+        conn.client_sockfd,
+        iovecs.as_ptr(),
+        iovecs.len() as i32
+    ));
 }
