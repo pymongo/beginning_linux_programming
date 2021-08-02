@@ -52,6 +52,7 @@ unsafe fn chat_server() {
                 let mut buf = [0_u8; 128];
                 let n_read = syscall!(recv(pollfds[fd].fd, buf.as_mut_ptr().cast(), buf.len(), 0));
                 if n_read == 0 {
+                    // receive TCP FIN from client
                     syscall!(close(pollfds[fd].fd));
                     println!("({}) left chat room", pollfds[fd].fd);
                     pollfds[fd].fd = -1;
@@ -84,10 +85,23 @@ unsafe fn chat_server() {
             } else if pollfds[fd].revents & POLLOUT == POLLOUT {
                 unreachable!();
             } else if pollfds[fd].revents & POLLERR == POLLERR {
+                // use getsockopt SO_ERROR to get error info
                 panic!("error occur on fd {}", fd);
             } else if pollfds[fd].revents & POLLHUP == POLLHUP {
                 panic!("client_id {} close", fd);
             }
         }
     }
+}
+
+#[test]
+fn test_poll_bitwise() {
+    let mut events = libc::POLLIN | libc::POLLERR;
+    println!("{:08b}", events);
+    // 去掉 读事件 的位运算，以便优先执行写事件
+    events &= !libc::POLLIN;
+    println!("{:08b}", events);
+    // 添加写事件，写事件执行结束后重新把读事件加回到 event 中
+    events |= libc::POLLOUT;
+    println!("{:08b}", events);
 }
