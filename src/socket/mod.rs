@@ -13,6 +13,7 @@ mod socket_12_ping_icmp_protocol;
 mod socket_13_http_writev_send_file;
 mod socket_14_sendfile_without_user_space_buf;
 mod socket_15_splice_without_user_space_buf_echo;
+mod socket_16_poll_chat_server;
 
 use crate::{htons, syscall};
 use std::os::unix::prelude::RawFd;
@@ -55,6 +56,17 @@ impl MyTcpServer {
             libc::SOCK_STREAM
         };
         let server_sockfd = syscall!(socket(libc::AF_INET, type_, 0));
+        // reuse server socket addr and event in TIME_WAIT (server close client first)
+        let enable = 1_i32;
+        // libc::SO_REUSEPORT 这个是允许 IPv4 和 IPv6 绑定到同一个端口，跟 SO_REUSEADDR 不一样
+        syscall!(setsockopt(
+            server_sockfd,
+            libc::SOL_SOCKET,
+            libc::SO_REUSEADDR,
+            (&enable as *const i32).cast(),
+            std::mem::size_of::<libc::c_int>() as libc::socklen_t
+        ));
+
         let server_addr = server_default_sockaddr_in();
         syscall!(bind(
             server_sockfd,
