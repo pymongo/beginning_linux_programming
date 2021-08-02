@@ -48,7 +48,7 @@ unsafe fn udp_echo_server() {
     loop {
         let mut client_addr: sockaddr_in = std::mem::zeroed();
         // https://stackoverflow.com/questions/23472533/recvfrom-not-filling-the-from-ip-address-even-for-udp-messages-in-first-call
-        let mut client_addr_len = std::mem::size_of::<sockaddr_in>() as socklen_t;
+        let mut client_addr_len = crate::SOCKADDR_IN_LEN;
         let mut buf = [0_u8; 256];
         let n_read = libc::recvfrom(
             server_socket_fd,

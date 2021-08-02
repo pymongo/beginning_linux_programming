@@ -15,6 +15,7 @@ mod socket_14_sendfile_without_user_space_buf;
 mod socket_15_splice_without_user_space_buf_echo;
 mod socket_16_poll_chat_server;
 mod socket_17_poll_chat_client_telnet;
+mod socket_18_epoll_both_tcp_udp_echo;
 
 use crate::{htons, syscall};
 use std::os::unix::prelude::RawFd;
