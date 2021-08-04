@@ -1,5 +1,6 @@
 //! Beginning Linux Programming 4th edition exercises
 #![feature(once_cell)]
+#![feature(extern_types)]
 #![warn(clippy::nursery, clippy::pedantic)]
 //#![warn(clippy::restriction)]
 #![allow(

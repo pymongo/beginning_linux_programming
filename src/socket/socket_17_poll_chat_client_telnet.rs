@@ -3,6 +3,7 @@ use crate::syscall;
 use libc::{POLLHUP, POLLIN, STDIN_FILENO, STDOUT_FILENO};
 
 #[test]
+#[allow(clippy::ptr_as_ptr)]
 fn telnet() {
     let addr = server_default_sockaddr_in();
     let sockfd = syscall!(socket(libc::AF_INET, libc::SOCK_STREAM, 0));

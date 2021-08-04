@@ -56,6 +56,7 @@ int main(const int argc, const char *argv[])
     srand((unsigned int)getpid());
 
     // key=IPC_PRIVATE only share sem in current process
+    // 如果是获取已有的信号，semget.num_sems 为 0
     const int sem_id = semget((key_t)1234, 1, 0666 | IPC_CREAT);
 
     char op_char = 'O';

@@ -64,6 +64,7 @@ unsafe fn chat_server() {
                 new_chat_msg.extend_from_slice(&buf[..n_read as usize]);
                 print!("{}", String::from_utf8_unchecked(new_chat_msg.clone()));
                 std::io::Write::flush(&mut std::io::stdout()).unwrap();
+                #[allow(clippy::needless_range_loop)]
                 for notify_fd in 0..nfds {
                     if pollfds[notify_fd].fd == -1 {
                         continue;

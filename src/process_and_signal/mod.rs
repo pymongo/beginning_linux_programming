@@ -1,13 +1,14 @@
 mod fork_1;
 mod get_fork_subprocess_status;
 mod handle_sigint_ctrl_c;
-mod message_queue_1_no_message_type;
-mod message_queue_2_msg_type_as_chat_room_id;
 mod pexec;
 mod process_priority;
 mod reload_config_file_by_inotify_watch;
 mod reload_config_file_by_signal;
 mod sigsuspend_sigaction_sigalrm;
+mod system_v_mq_1_no_message_type;
+mod system_v_mq_2_msg_type_as_chat_room_id;
+mod system_v_semaphores;
 mod system_v_shared_memory;
 mod wait_child_process;
 mod zombie_child_process;
