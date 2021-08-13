@@ -56,7 +56,8 @@ unsafe fn server() {
                     std::mem::size_of::<u8>(),
                 );
                 if n_read == 0 {
-                    libc::shutdown(client_socket_fd, libc::SHUT_RDWR);
+                    // libc::shutdown(client_socket_fd, libc::SHUT_RDWR);
+                    libc::close(client_socket_fd);
                     break;
                 }
                 // println!("request = {}\nresponse = {}", req_buf, req_buf);
@@ -66,6 +67,7 @@ unsafe fn server() {
                     std::mem::size_of::<u8>(),
                 );
             }
+            libc::exit(libc::EXIT_SUCCESS);
         }
     }
 }

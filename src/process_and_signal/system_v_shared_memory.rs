@@ -18,8 +18,10 @@ unsafe fn run(is_consumer: bool) {
 
     /* libc::shmget: create shared memory
      * arg_1-key: System V IPC key
-     * arg_2-size: shared memory len in bytes
-     * arg_3-shmflag: read/write permission bits to shared_memory, flag usually `0666 | IPC_CREAT`
+     * arg_2-size: shared memory len in bytes，如果是获取已存在的共享内存则可以把 size 设置成 0
+     * arg_3-shmflag:
+     *     read/write permission bits to shared_memory, flag usually `0666 | IPC_CREAT`
+     *     SHM_HUGETLB/SHM_NORESERVE is same to mmap flags, NORESERVE means not share swap file(物理内存不足时写操作会 SIGSEGV)
      * return: shmid of shared_memory
      */
     let shmid = libc::shmget(1234, std::mem::size_of::<bool>(), 0o622 | libc::IPC_CREAT);
