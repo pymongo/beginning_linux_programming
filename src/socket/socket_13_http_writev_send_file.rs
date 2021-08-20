@@ -7,7 +7,7 @@ fn server() {
     server.bind_listen();
     let conn = server.accept();
 
-    let file_name = format!("{}/Cargo.toml\0", env!("CARGO_MANIFEST_DIR"));
+    let file_name = concat!(env!("CARGO_MANIFEST_DIR"), "/Cargo.toml\0");
     let mut file_stat = unsafe { std::mem::zeroed() };
     syscall!(stat(file_name.as_ptr().cast(), &mut file_stat));
     let file_size = file_stat.st_size as usize;

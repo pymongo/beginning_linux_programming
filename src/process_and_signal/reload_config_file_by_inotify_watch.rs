@@ -9,11 +9,10 @@ fn main() {
     let mut config = Config::load_production_config();
     dbg!(&config);
     let inotify_fd = syscall!(inotify_init());
-    let config_path = format!(
-        "{}/src/process_and_signal/config_file.toml\0",
-        env!("CARGO_MANIFEST_DIR")
+    let config_path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/process_and_signal/config_file.toml\0"
     );
-    dbg!(&config_path);
     let _wd = syscall!(inotify_add_watch(
         inotify_fd,
         config_path.as_ptr().cast(),
