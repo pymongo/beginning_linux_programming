@@ -10,7 +10,7 @@ try sugar 也就是问号如何知道具体是哪一个问号出错呢?
 所以「必须要每个函数返回值都是 anyhow 才能记住栈调用」
 */
 fn main() -> anyhow::Result<()> {
-    std::env::set_var("RUST_BACKTRACE", "1");
+    // std::env::set_var("RUST_BACKTRACE", "1");
     foo()?;
     Ok(())
 }
