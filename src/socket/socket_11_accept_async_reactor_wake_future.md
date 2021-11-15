@@ -16,7 +16,7 @@
 
 #### golang 有栈协程抢占式调度
 
-通过定时器 run_inverval 发特定信号，例如 SIGURG
+通过定时器 run_interval 发特定信号，例如 SIGURG
 
 确保调度器「能按时间片均匀介入」
 

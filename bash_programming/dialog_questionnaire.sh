@@ -1,5 +1,5 @@
 #!/bin/bash
-set -u # print error when evalute undefined variable
+set -u # print error when evaluate undefined variable
 
 DIALOG_OK=0
 DIALOG_CANCEL_OR_NO_OR_CTRL_C=1

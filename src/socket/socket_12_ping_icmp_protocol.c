@@ -28,10 +28,10 @@ unsigned short checksum(void *b, int len) {
     return result;
 }
 
-bool ping(char *adress) {
+bool ping(char *address) {
     struct sockaddr_in r_addr;
     struct sockaddr_in addr_ping, *addr;
-    struct hostent *hname = gethostbyname(adress);
+    struct hostent *hname = gethostbyname(address);
     bzero(&addr_ping, sizeof(addr_ping));
     addr_ping.sin_family = hname->h_addrtype;
     addr_ping.sin_port = 0;

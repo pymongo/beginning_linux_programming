@@ -131,7 +131,7 @@ fn client() {
         (&buf as *const u8).cast(),
         std::mem::size_of::<u8>(),
     ));
-    println!("reqeust = {}", buf);
+    println!("request = {}", buf);
     syscall!(read(
         socket_fd,
         (&mut buf as *mut u8).cast(),
