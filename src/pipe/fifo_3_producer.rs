@@ -23,4 +23,8 @@ unsafe fn main_() {
         assert_eq!(n_write, libc::PIPE_BUF);
         total_n_write += n_write;
     }
+    // https://www.reddit.com/r/rust/comments/hk4x1i/how_to_properly_stop_reading_from_a_fifo_named/
+    // What is writing to your pipe?fs::read_to_string will read until EOF,
+    // and reading from the pipe will return EOF automatically when all of the writers close the fd associated with it.
+    // 当 fd 关闭之后，fifo 的 read 端才能收到 EOF
 }
