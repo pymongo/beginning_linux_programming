@@ -15,7 +15,9 @@ fn main() {
     let pid = unsafe { libc::getpid() };
     println!("PID = {}", pid);
     unsafe {
-        libc::signal(libc::SIGINT, sigint_handler as libc::sighandler_t);
+        if libc::SIG_ERR == libc::signal(libc::SIGINT, sigint_handler as libc::sighandler_t) {
+            panic!("{}", std::io::Error::last_os_error());
+        }
     }
     loop {
         println!("waiting for ctrl+c signal");
