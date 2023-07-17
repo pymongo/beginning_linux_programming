@@ -20,6 +20,24 @@ macro_rules! not_minus_1 {
     }};
 }
 
+/* syscall! alternative
+trait FfiRetError {
+    fn has_err(self, err: *mut KCIError);
+}
+impl FfiRetError for i32 {
+    fn has_err(self, err: *mut KCIError) {
+        #[allow(unused_unsafe)]
+        let res = unsafe { libc::$fun($($arg),*) };
+        if res == -1 {
+            // Err(std::io::Error::last_os_error())
+            panic!("{}", std::io::Error::last_os_error())
+        } else {
+            // Ok(res)
+            res
+        }
+    }
+}
+*/
 /// call to libc's function
 #[macro_export]
 macro_rules! syscall {
